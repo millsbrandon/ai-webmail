@@ -4,7 +4,7 @@ Version 1.0 • 7 October 2026
 Companion: AI_WEBMAIL_DESIGN_PLAYBOOK.md. Product: standalone open-source codebase; NO OpenClaw runtime.
 
 ## Current truth
-Implementation completed: **0 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. Current state: W01 is blocked after local bootstrap. Repository destination and AGPL-3.0 license are approved; GitHub CLI authentication, remote creation, push and remote SHA verification are pending. WhatsApp and AI subscription feasibility remain unverified for the new app.
+Implementation completed: **0 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. Current state: W01 is in review. The approved public GitHub repository and sanitized baseline are pushed, and remote SHAs have been verified. Owner review of the baseline and G0 sign-off are pending. W02–W04 remain blocked on the evidence and decisions recorded below.
 
 Documentation deliverables: design playbook and this tracker authored; document checks are separate from implementation progress.
 
@@ -15,11 +15,11 @@ Before task: confirm dependencies, owner, acceptance IDs, branch/commit and test
 
 ## G0 — Design and feasibility
 Entry: No feature implementation until baseline reviewed.
-Gate status: NOT STARTED. Reviewer/date: —
+Gate status: IN REVIEW; owner sign-off pending. Reviewer/date: —
 
 | ID | Task | Status | Required completion evidence | Acceptance |
 |---|---|---|---|---|
-| W01 | Approve baseline/name/license; bootstrap dedicated local and GitHub repository | blocked | Approved GitHub owner/name/license; sanitized docs baseline committed and pushed; remote SHA verified | A01–A15 |
+| W01 | Approve baseline/name/license; bootstrap dedicated local and GitHub repository | review | Approved GitHub owner/name/license; sanitized docs baseline committed and pushed; remote SHA verified | A01–A15 |
 | W02 | Prove supported subscription route without paid fallback | blocked | Official terms/auth flow documented; test request and quota-stop behavior evidenced | A13 |
 | W03 | Assess WhatsApp group route and privacy | blocked | Supported route, fees and risks documented; blocked if zero-cost path unproved | A14 |
 | W04 | Confirm mailbox/provider, users, sources and retention | blocked | Endpoint/folder sheet, membership matrix and approved FAQ list signed off | A01,A02 |
@@ -177,9 +177,9 @@ D010: SMTP ambiguity — delivery_unknown, no blind resend; do not promise exact
 
 ## W02/W03 independent feasibility research — 7 October 2026
 
-Research was done from official public documentation while W01 remote setup is blocked. It does not complete either task: no live account eligibility, owner acceptance, integration test, or cost authorization has been obtained.
+Research was done from official public documentation while W01 remote setup was in progress. It does not complete either task: no live account eligibility, owner acceptance, integration test, or cost authorization has been obtained.
 
-- Local evidence checkpoint: branch `docs/W02-W03-feasibility`, commit `f33e8466c43bbde1036d205e0be6cbdf95a35b2f`.
+- Local evidence checkpoint: branch `docs/W02-W03-feasibility`; latest pushed commit before this tracker update: `d2bd903b078909ad7c8519f3c5c7bb798f09d8be`.
 
 ### W02 — ChatGPT/Codex subscription route
 
@@ -200,16 +200,16 @@ Research was done from official public documentation while W01 remote setup is b
 - Status: **blocked**. The handoff does not supply confirmed provider endpoints/folders, mailbox credentials, the actual staff list and access matrix, approved FAQ sources, or retention/recovery destinations. Example mailbox addresses and example colleague access are requirements, not verified configuration.
 - Do not read FreeScout mail or extract credentials to fill these gaps. Use synthetic fixtures until the owner provides task-specific configuration and approves any live-mail scope.
 
-## W01 local bootstrap checkpoint — 7 October 2026
+## W01 repository bootstrap checkpoint — 7 October 2026
 
-- Status: **blocked**; GitHub authorization has not completed, so no remote was created or pushed.
+- Status: **review**; local bootstrap, first public push, and remote SHA verification are complete. Owner review of the design baseline/G0 gate remains pending. No feature implementation has started.
 - Approved destination: `millsbrandon/ai-webmail`; project name: AI Webmail; license: AGPL-3.0-only.
-- Local baseline: standalone Git repository on `main`; sanitized design documents, license, README, `.gitignore`, `AGENTS.md`, and `.github/copilot-instructions.md`. Local commit: `d5db2add8e20a013bb08ca172b24a607b79f5f3a`.
-- Validation: `git diff --cached --check` passed. A targeted scan found no original business domain, server IPs, private key path, private-key header, GitHub token pattern, or AWS access-key pattern. `gitleaks` is not installed. No application tests apply; no application code exists.
+- Local baseline: standalone Git repository on `main`; sanitized design documents, license, README, `.gitignore`, `AGENTS.md`, and `.github/copilot-instructions.md`. Baseline commit `d5db2add8e20a013bb08ca172b24a607b79f5f3a` is pushed to `origin/main`; `git ls-remote` verified the exact SHA.
+- Validation: `git diff --check` passed. Gitleaks 8.30.1 scanned all local Git history (`gitleaks git --no-banner --redact --log-opts='--all' .`) with no leaks found. The targeted scan also found no private business domain, server IPs, private key path, private-key header, GitHub token pattern, or AWS access-key pattern. No application tests apply; no application code exists.
 - Privacy/cost: synthetic/public examples only; no credentials, customer mail, private deployment inventory, or paid services added. AI and WhatsApp remain blocked pending eligibility and cost proof.
 - Rollback: no remote or live-system changes have occurred; any correction should be made as a normal follow-up commit.
-- GitHub branch / commit / PR / remote SHA: pending authentication and remote creation. W01 is not done until push and remote SHA are verified.
-- Next permitted action: complete GitHub CLI authentication, create the approved repository, push this baseline, verify the remote SHA, and review G0 before selecting W02.
+- GitHub: public repository `https://github.com/millsbrandon/ai-webmail`; `main` remote SHA verified as `d5db2add8e20a013bb08ca172b24a607b79f5f3a`. Feasibility branch SHA will be recorded after this review update is pushed.
+- Next permitted action: owner reviews the published sanitized baseline and signs off G0, or requests changes. Only then may W02–W04 proceed independently as allowed by the tracker; feature implementation remains gated.
 
 ## Requirement traceability
 | Requirement | Primary tasks | Acceptance |
