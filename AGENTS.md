@@ -47,7 +47,13 @@
 
 ## Validation
 
-There is no application test command until implementation tasks establish it.
+Use Node.js 24 LTS as selected in `.node-version`. The exact npm version is
+recorded in `package.json`; use the committed `package-lock.json`.
+
+At the foundation stage, run `npm ci --ignore-scripts`, `npm audit`, and
+`gitleaks git --no-banner --redact --log-opts='--all' .`. Review install scripts
+before allowing them; later native dependencies may require an explicitly
+reviewed build step. Application test commands do not exist until later tasks.
 For documentation-only changes, at minimum inspect the diff, run
 `git diff --check`, and scan for private identifiers/secrets before committing.
 Document exact commands and results in the tracker; do not imply unrun checks

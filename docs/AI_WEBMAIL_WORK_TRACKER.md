@@ -4,7 +4,7 @@ Version 1.0 • 7 October 2026
 Companion: AI_WEBMAIL_DESIGN_PLAYBOOK.md. Product: standalone open-source codebase; NO OpenClaw runtime.
 
 ## Current truth
-Implementation completed: **0 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. Current state: W01 is in review. The approved public GitHub repository and sanitized baseline are pushed, and remote SHAs have been verified. Owner review of the baseline and G0 sign-off are pending. W02–W04 remain blocked on the evidence and decisions recorded below.
+Implementation completed: **0 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01 is done and the owner has approved beginning implementation. G0 is exited for foundation work with W02–W04 explicitly blocked; AI, WhatsApp, and real mailbox integration stay disabled. W05 is the single active implementation task.
 
 Documentation deliverables: design playbook and this tracker authored; document checks are separate from implementation progress.
 
@@ -15,11 +15,11 @@ Before task: confirm dependencies, owner, acceptance IDs, branch/commit and test
 
 ## G0 — Design and feasibility
 Entry: No feature implementation until baseline reviewed.
-Gate status: IN REVIEW; owner sign-off pending. Reviewer/date: —
+Gate status: EXITED FOR FOUNDATION WORK WITH EXPLICIT BLOCKERS. Reviewer/date: owner direction, 7 October 2026.
 
 | ID | Task | Status | Required completion evidence | Acceptance |
 |---|---|---|---|---|
-| W01 | Approve baseline/name/license; bootstrap dedicated local and GitHub repository | review | Approved GitHub owner/name/license; sanitized docs baseline committed and pushed; remote SHA verified | A01–A15 |
+| W01 | Approve baseline/name/license; bootstrap dedicated local and GitHub repository | done | Approved GitHub owner/name/license; sanitized docs baseline committed and pushed; remote SHA verified | A01–A15 |
 | W02 | Prove supported subscription route without paid fallback | blocked | Official terms/auth flow documented; test request and quota-stop behavior evidenced | A13 |
 | W03 | Assess WhatsApp group route and privacy | blocked | Supported route, fees and risks documented; blocked if zero-cost path unproved | A14 |
 | W04 | Confirm mailbox/provider, users, sources and retention | blocked | Endpoint/folder sheet, membership matrix and approved FAQ list signed off | A01,A02 |
@@ -28,11 +28,11 @@ Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate sig
 
 ## G1 — Repository and environment
 Entry: G0 baseline approved; unresolved integrations stay disabled.
-Gate status: NOT STARTED. Reviewer/date: —
+Gate status: IN PROGRESS. Reviewer/date: —
 
 | ID | Task | Status | Required completion evidence | Acceptance |
 |---|---|---|---|---|
-| W05 | Add code structure, threat model, dependency/license inventory to bootstrapped repo | todo | Pinned lockfile, secret scan, architecture decision record; task branch pushed | A01 |
+| W05 | Add code structure, threat model, dependency/license inventory to bootstrapped repo | review | Pinned lockfile, secret scan, architecture decision record; task branch pushed | A01 |
 | W06 | Set up web/worker/database skeleton and migrations | todo | Repeatable local start; least-privileged DB roles; isolated test DB | A04 |
 | W07 | Set up tests and CI | todo | Typecheck, lint, unit/integration/e2e/accessibility checks run | A01–A15 |
 | W08 | Implement design tokens and component gallery | todo | All states, both themes, icon registry, contrast report | A10 |
@@ -174,6 +174,7 @@ D007: Official WhatsApp Groups API requires an Official Business Account and use
 D008: Codex documentation describes subscription-authenticated use in Codex products and SDK/app integration for coding tasks; it does not prove this self-hosted email-drafting use is eligible or that this account can use it. Do not use API billing or an unsupported client; AI remains disabled pending explicit proof.
 D009: Shared provider Seen versus per-user unread — app keeps per-user read cursors.
 D010: SMTP ambiguity — delivery_unknown, no blind resend; do not promise exactly once.
+D011: Owner approved the repository baseline and requested implementation start. Proceed with repository/environment groundwork while AI, WhatsApp, live mailbox access, and deployment remain blocked pending their specific gates.
 
 ## W02/W03 independent feasibility research — 7 October 2026
 
@@ -202,14 +203,27 @@ Research was done from official public documentation while W01 remote setup was 
 
 ## W01 repository bootstrap checkpoint — 7 October 2026
 
-- Status: **review**; local bootstrap, first public push, and remote SHA verification are complete. Owner review of the design baseline/G0 gate remains pending. No feature implementation has started.
+- Status: **done**; owner approved beginning implementation on 7 October 2026. Local bootstrap, first public push, and remote SHA verification are complete.
 - Approved destination: `millsbrandon/ai-webmail`; project name: AI Webmail; license: AGPL-3.0-only.
 - Local baseline: standalone Git repository on `main`; sanitized design documents, license, README, `.gitignore`, `AGENTS.md`, and `.github/copilot-instructions.md`. Baseline commit `d5db2add8e20a013bb08ca172b24a607b79f5f3a` is pushed to `origin/main`; `git ls-remote` verified the exact SHA.
 - Validation: `git diff --check` passed. Gitleaks 8.30.1 scanned all local Git history (`gitleaks git --no-banner --redact --log-opts='--all' .`) with no leaks found. The targeted scan also found no private business domain, server IPs, private key path, private-key header, GitHub token pattern, or AWS access-key pattern. No application tests apply; no application code exists.
 - Privacy/cost: synthetic/public examples only; no credentials, customer mail, private deployment inventory, or paid services added. AI and WhatsApp remain blocked pending eligibility and cost proof.
 - Rollback: no remote or live-system changes have occurred; any correction should be made as a normal follow-up commit.
 - GitHub: public repository `https://github.com/millsbrandon/ai-webmail`; `main` remote SHA verified as `d5db2add8e20a013bb08ca172b24a607b79f5f3a`. Review PR [#1](https://github.com/millsbrandon/ai-webmail/pull/1) is open and unmerged. Feasibility branch SHA `71c5f21c69fbd6ca8a348b9747d4e821d6650e9c` was verified against the remote before this tracker update.
-- Next permitted action: owner reviews the published sanitized baseline and signs off G0, or requests changes. Only then may W02–W04 proceed independently as allowed by the tracker; feature implementation remains gated.
+- G0 exit decision: proceed with foundation work only; W02–W04 remain explicitly blocked. No AI/WhatsApp integration, real mailbox access, customer mail, or deployment is authorized by this decision.
+- Next permitted task: W05, branch `feat/W05-security-structure`, based on the open W01 review PR.
+
+## W05 foundation checkpoint — 7 October 2026
+
+- Status: **review**; repository foundation only. No mail UI, mailbox connection, authentication endpoint, worker, AI, WhatsApp, or deployment has been implemented.
+- Branch: `feat/W05-security-structure`, stacked on W01 review branch `docs/W02-W03-feasibility`. W05 acceptance evidence is in this branch/PR; nothing has been merged.
+- Changed: Node 24/npm pin, exact-pinned TypeScript development tool and lockfile; repository structure, initial threat model, dependency/license inventory, ADR-0001; persistent contributor/Copilot validation guidance and README links.
+- Tests/checks: official Node.js 24.21.0 ARM64 archive SHA-256 verified against Node.js `SHASUMS256.txt`; `npm ci --ignore-scripts` passed; `npm exec -- tsc --version` reported 7.0.2; `npm audit` reported 0 vulnerabilities; `git diff --check` passed. Gitleaks full-history and staged-diff scan required immediately before push.
+- Dependency scope: only TypeScript is currently installed. Other listed versions are public-registry candidate snapshots, not installed or security-approved; full license/advisory review is required when they enter W06/W07 manifests. Native install scripts remain disabled until separately reviewed.
+- Privacy/cost: no live mail, provider credentials, customer data, private server inventory, external AI, WhatsApp, or paid service used.
+- Rollback: revert only this task branch's commits; no migrations, external services, deployment, or server changes exist.
+- Commit / PR / remote SHA: recorded after the W05 branch is pushed and PR opened.
+- Next permitted task after W05 review: W06 web/worker/database skeleton and migrations. W02–W04 remain blocked and optional integrations remain disabled.
 
 ## Requirement traceability
 | Requirement | Primary tasks | Acceptance |

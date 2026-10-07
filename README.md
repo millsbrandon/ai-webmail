@@ -4,8 +4,9 @@ An open-source, self-hosted shared-inbox webmail application for existing
 IMAP/SMTP accounts. The intended stack and safety requirements are documented
 in [`docs/AI_WEBMAIL_DESIGN_PLAYBOOK.md`](docs/AI_WEBMAIL_DESIGN_PLAYBOOK.md).
 
-**Status: design baseline only.** No application has been implemented, tested
-against a mail provider, or deployed. The committed work tracker is
+**Status: foundation work in progress.** No application features have been
+implemented or tested against a mail provider, and nothing has been deployed.
+The committed work tracker is
 [`docs/AI_WEBMAIL_WORK_TRACKER.md`](docs/AI_WEBMAIL_WORK_TRACKER.md); all 40
 implementation tasks remain incomplete until their evidence and acceptance
 criteria are met.
@@ -28,6 +29,10 @@ criteria are met.
 - [Gated work tracker](docs/AI_WEBMAIL_WORK_TRACKER.md)
 - [Feature research](docs/EMAIL_SYSTEM_FEATURE_RESEARCH.md)
 - [Design validation](docs/AI_WEBMAIL_DESIGN_VALIDATION.md)
+- [Repository structure](docs/REPOSITORY_STRUCTURE.md)
+- [Threat model](docs/THREAT_MODEL.md)
+- [Dependency/license inventory](docs/DEPENDENCY_INVENTORY.md)
+- [Architecture decision record](docs/decisions/ADR-0001-initial-architecture.md)
 
 ## License
 
