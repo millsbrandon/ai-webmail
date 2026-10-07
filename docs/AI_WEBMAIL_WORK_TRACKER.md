@@ -179,7 +179,7 @@ D010: SMTP ambiguity — delivery_unknown, no blind resend; do not promise exact
 
 Research was done from official public documentation while W01 remote setup was in progress. It does not complete either task: no live account eligibility, owner acceptance, integration test, or cost authorization has been obtained.
 
-- Local evidence checkpoint: branch `docs/W02-W03-feasibility`; latest pushed commit before this tracker update: `d2bd903b078909ad7c8519f3c5c7bb798f09d8be`.
+- Local evidence checkpoint: branch `docs/W02-W03-feasibility`; latest verified push before this tracker update: `71c5f21c69fbd6ca8a348b9747d4e821d6650e9c`.
 
 ### W02 — ChatGPT/Codex subscription route
 
@@ -208,7 +208,7 @@ Research was done from official public documentation while W01 remote setup was 
 - Validation: `git diff --check` passed. Gitleaks 8.30.1 scanned all local Git history (`gitleaks git --no-banner --redact --log-opts='--all' .`) with no leaks found. The targeted scan also found no private business domain, server IPs, private key path, private-key header, GitHub token pattern, or AWS access-key pattern. No application tests apply; no application code exists.
 - Privacy/cost: synthetic/public examples only; no credentials, customer mail, private deployment inventory, or paid services added. AI and WhatsApp remain blocked pending eligibility and cost proof.
 - Rollback: no remote or live-system changes have occurred; any correction should be made as a normal follow-up commit.
-- GitHub: public repository `https://github.com/millsbrandon/ai-webmail`; `main` remote SHA verified as `d5db2add8e20a013bb08ca172b24a607b79f5f3a`. Feasibility branch SHA will be recorded after this review update is pushed.
+- GitHub: public repository `https://github.com/millsbrandon/ai-webmail`; `main` remote SHA verified as `d5db2add8e20a013bb08ca172b24a607b79f5f3a`. Review PR [#1](https://github.com/millsbrandon/ai-webmail/pull/1) is open and unmerged. Feasibility branch SHA `71c5f21c69fbd6ca8a348b9747d4e821d6650e9c` was verified against the remote before this tracker update.
 - Next permitted action: owner reviews the published sanitized baseline and signs off G0, or requests changes. Only then may W02–W04 proceed independently as allowed by the tracker; feature implementation remains gated.
 
 ## Requirement traceability
