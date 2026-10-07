@@ -179,6 +179,8 @@ D010: SMTP ambiguity — delivery_unknown, no blind resend; do not promise exact
 
 Research was done from official public documentation while W01 remote setup is blocked. It does not complete either task: no live account eligibility, owner acceptance, integration test, or cost authorization has been obtained.
 
+- Local evidence checkpoint: branch `docs/W02-W03-feasibility`, commit `f33e8466c43bbde1036d205e0be6cbdf95a35b2f`.
+
 ### W02 — ChatGPT/Codex subscription route
 
 - Status: **blocked**. Official Codex documentation describes ChatGPT subscription sign-in for Codex desktop, CLI, and IDE surfaces, and a Codex SDK for integrating Codex into applications for coding tasks. It does not establish that this private webmail app may use subscription access for customer-email drafting or that the owner’s specific plan/account is eligible.
