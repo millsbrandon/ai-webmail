@@ -53,12 +53,14 @@ recorded in `package.json`; use the committed `package-lock.json`.
 
 At the foundation stage, run `npm ci --ignore-scripts`, `npm audit`,
 `npm run lint`, `npm run typecheck`, `npm run build`,
-`npm run worker:build`, relevant database migration checks, and
+`npm run worker:build`, `npm run test:unit`, `npm run test:integration`,
+`npm run test:e2e`, relevant database migration checks, and
 `gitleaks git --no-banner --redact --log-opts='--all'` and
 `gitleaks protect --staged --no-banner --redact`. Review install scripts before
 allowing them; later native dependencies may require an explicitly reviewed
-build step. Unit, integration, and end-to-end test commands do not exist until
-their tracker task establishes them.
+build step. The local database and browser prerequisites are documented in
+`docs/DEVELOPMENT.md`; Playwright requires
+`npx playwright install chromium`.
 For documentation-only changes, at minimum inspect the diff, run
 `git diff --check`, and scan for private identifiers/secrets before committing.
 Document exact commands and results in the tracker; do not imply unrun checks

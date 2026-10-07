@@ -5,6 +5,8 @@ out/
 dist/
 coverage/
 .turbo/
+playwright-report/
+test-results/
 
 # Local configuration and private operator data
 .env*

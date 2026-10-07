@@ -21,8 +21,10 @@ diff, run relevant free/local checks and a secret scan, update the tracker,
 commit, push, and verify the remote SHA. Do not deploy on push or use destructive
 Git operations. At the foundation stage, validate with `npm ci --ignore-scripts`,
 `npm audit`, `npm run lint`, `npm run typecheck`, `npm run build`,
-`npm run worker:build`, relevant database migration checks, and
+`npm run worker:build`, `npm run test:unit`, `npm run test:integration`,
+`npm run test:e2e`, relevant database migration checks, and
 `git diff --check`, `gitleaks git --no-banner --redact --log-opts='--all'`,
 and `gitleaks protect --staged --no-banner --redact`. Review native install
-scripts before running them. Unit, integration, and end-to-end test commands
-are not established until their tracker task adds them.
+scripts before running them. The local database and browser prerequisites are
+documented in `docs/DEVELOPMENT.md`; Playwright requires
+`npx playwright install chromium`.

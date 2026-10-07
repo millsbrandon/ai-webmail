@@ -7,8 +7,8 @@ in [`docs/AI_WEBMAIL_DESIGN_PLAYBOOK.md`](docs/AI_WEBMAIL_DESIGN_PLAYBOOK.md).
 **Status: foundation work in progress.** No application features have been
 implemented or tested against a mail provider, and nothing has been deployed.
 The 40-task tracker records completion only when evidence and acceptance
-criteria are met; W01 and W05 are complete, and W06 foundation work is in
-progress. See
+criteria are met; W01, W05, and W06 are complete, and W07 test/CI work is in
+progress. See the
 [`docs/AI_WEBMAIL_WORK_TRACKER.md`](docs/AI_WEBMAIL_WORK_TRACKER.md).
 
 ## Project boundaries

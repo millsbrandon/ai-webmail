@@ -4,7 +4,7 @@ Version 1.0 • 7 October 2026
 Companion: AI_WEBMAIL_DESIGN_PLAYBOOK.md. Product: standalone open-source codebase; NO OpenClaw runtime.
 
 ## Current truth
-Implementation completed: **3 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05, and W06 are done; W07 is next in sequence. G0 is exited for foundation work with W02–W04 explicitly blocked; AI, WhatsApp, and real mailbox integration stay disabled.
+Implementation completed: **3 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05, and W06 are done; W07 is the single active implementation task. G0 is exited for foundation work with W02–W04 explicitly blocked; AI, WhatsApp, and real mailbox integration stay disabled.
 
 Documentation deliverables: design playbook and this tracker authored; document checks are separate from implementation progress.
 
@@ -34,7 +34,7 @@ Gate status: IN PROGRESS. Reviewer/date: —
 |---|---|---|---|---|
 | W05 | Add code structure, threat model, dependency/license inventory to bootstrapped repo | done | Pinned lockfile, secret scan, architecture decision record; task branch pushed | A01 |
 | W06 | Set up web/worker/database skeleton and migrations | done | Repeatable local start; least-privileged DB roles; isolated test DB | A04 |
-| W07 | Set up tests and CI | todo | Typecheck, lint, unit/integration/e2e/accessibility checks run | A01–A15 |
+| W07 | Set up tests and CI | in_progress | Typecheck, lint, unit/integration/e2e/accessibility checks run | A01–A15 |
 | W08 | Implement design tokens and component gallery | todo | All states, both themes, icon registry, contrast report | A10 |
 
 Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate signature and release impact recorded before next phase.
@@ -228,13 +228,23 @@ Research was done from official public documentation while W01 remote setup was 
 ## W06 foundation checkpoint — 7 October 2026
 
 - Status: **done**. Core web, worker, and database skeletons are implemented and repeatable local Compose startup and database-role acceptance checks pass.
-- Branch: `feat/W06-monorepo-foundation`, based on W05 branch `feat/W05-security-structure`. Commit `df7c5376f084e32d847ccd61750afc588de32063` contains the foundation; stacked PR [#3](https://github.com/millsbrandon/ai-webmail/pull/3) is open and unmerged. The final W06 tracker checkpoint is pushed on the same branch; GitHub's head SHA is verified.
+- Branch: `feat/W06-monorepo-foundation`, based on W05 branch `feat/W05-security-structure`. Commit `df7c5376f084e32d847ccd61750afc588de32063` contains the foundation; final Compose evidence commit is `c23ecff641e4f45ea206ff52caf79ab00b67e002`. Stacked PR [#3](https://github.com/millsbrandon/ai-webmail/pull/3) is open and unmerged; GitHub's head SHA matches the final W06 commit.
 - Changed: pinned npm workspaces for Next.js/React, worker, and Drizzle/PostgreSQL; local-only environment templates; loopback-only PostgreSQL Compose definition and separate migrator/runtime roles; app-schema migration and isolated `webmail_test`; database health endpoint; no-mailbox-connected landing page; graceful idle worker; development instructions; dependency inventory and tracker.
 - Validation: Node.js 24.21.0; clean `npm ci --ignore-scripts` passed; `npm run lint` passed; `npm run typecheck` passed for web/worker/database; `npm run build` passed; `npm run worker:build` passed; `npm audit` reported 0 vulnerabilities; `npm run db:generate` reported no schema changes after migration generation. Installed the Docker CLI 29.8.2, Compose v2 5.6.0, and Colima 0.10.3; started an Apple Virtualization Framework runtime without restarting the computer and registered Homebrew's Compose plugin in the Docker CLI's existing user configuration. `docker compose --env-file .env.compose config --quiet` passed. A fresh `docker compose --env-file .env.compose up -d --wait` pulled PostgreSQL 18.6, initialized successfully, and passed its health check. The initialization script created both non-superuser roles, two migrator-owned databases, and runtime CONNECT without database CREATE. `npm run db:migrate` applied to both databases; runtime-role probes verified SELECT/INSERT/DELETE and denied DDL in both. `docker compose down` followed by `up -d --wait` recreated a healthy container while preserving both migrated schemas and the named volume. The production server started on loopback and `/api/health` returned HTTP 200 `{"status":"ok"}`; server and worker stopped after checks.
 - Dependency/license evidence: direct packages are exact-pinned; installed package SPDX metadata was checked against npm registry. Stable Drizzle ORM/Kit versions were retained; nested esbuild is patched to 0.25.12. Full `npm audit` is clean.
 - Privacy/cost: only synthetic/local setup was exercised; no live mail, customer data, credentials, external AI, WhatsApp, paid service, or deployment was used. Generated local `.env*` files remain ignored and must not be committed.
 - Secret scan: Gitleaks scanned all 11 reachable commits and the staged W06 changes; no leaks found.
 - Acceptance: repeatable local start, least-privileged runtime role, and isolated test database are verified. W07 test and CI work may proceed on its own task branch. Leave W02–W04 blocked and keep live mailbox, AI, and WhatsApp integrations disabled.
+
+## W07 test and CI checkpoint — 7 October 2026
+
+- Status: **in progress**. Work is limited to automated local tests and free GitHub Actions checks; no application feature or external-service integration is authorized.
+- Branch: `feat/W07-tests-ci`, based on the completed W06 branch. Acceptance IDs A01–A15.
+- Plan: add unit tests for database configuration and health-route error/configuration behavior, a PostgreSQL-backed integration test using the isolated test database, Chromium end-to-end and axe accessibility checks, and a read-only GitHub Actions workflow that starts the documented Compose database with ephemeral credentials.
+- Changed: Node test-runner checks for database schema/connection configuration and health-route missing/unavailable/healthy behavior; Playwright Chromium tests for the disconnected landing page, health endpoint, and axe WCAG 2.2 A/AA/accessibility best-practice violations; root test scripts; read-only GitHub Actions workflow with fresh Compose provisioning and ephemeral credentials; local verification instructions and exact test-tool license/version inventory. The Next workspace launcher now consistently loads the repository-level environment file.
+- Validation: clean `npm ci --ignore-scripts` passed; `npm run lint` passed; `npm run typecheck` passed across workspaces; `npm run test` passed (4 unit, 1 isolated-PostgreSQL integration, 3 Chromium e2e/accessibility tests); axe reported zero violations; `npm run build` and `npm run worker:build` passed; `npm audit` reported 0 vulnerabilities. The CI workflow YAML parses. Gitleaks scanned all 15 reachable commits and staged changes with no findings. Remote GitHub Actions validation and final remote SHA verification remain before marking W07 complete.
+- Privacy/cost: tests use only the disposable local Compose databases and synthetic settings; CI uses short-lived generated credentials and no paid services. No live mailbox, AI, WhatsApp, or production credentials.
+- Rollback: revert only the W07 branch changes; CI does not deploy or modify external services.
 
 ## Requirement traceability
 | Requirement | Primary tasks | Acceptance |

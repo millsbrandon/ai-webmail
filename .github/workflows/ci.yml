@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, typecheck, tests, and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up pinned npm
+        run: |
+          npm install --global npm@11.16.0
+          test "$(npm --version)" = "11.16.0"
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Create ephemeral local environment
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from secrets import token_hex
+
+          bootstrap_password = token_hex(32)
+          migrator_password = token_hex(32)
+          runtime_password = token_hex(32)
+          connection = lambda user, password, database: (
+              f"postgresql://{user}:{password}@127.0.0.1:5432/{database}"
+          )
+          files = {
+              ".env.compose": "\n".join([
+                  "POSTGRES_USER=webmail_bootstrap",
+                  f"POSTGRES_PASSWORD={bootstrap_password}",
+                  "POSTGRES_DB=webmail",
+                  f"DB_MIGRATOR_PASSWORD={migrator_password}",
+                  f"DB_RUNTIME_PASSWORD={runtime_password}",
+                  "",
+              ]),
+              ".env.migrations": "\n".join([
+                  "DATABASE_MIGRATOR_URL="
+                  + connection("webmail_migrator", migrator_password, "webmail"),
+                  "DATABASE_TEST_URL="
+                  + connection("webmail_migrator", migrator_password, "webmail_test"),
+                  "",
+              ]),
+              ".env": "DATABASE_URL="
+              + connection("webmail_runtime", runtime_password, "webmail")
+              + "\n",
+          }
+          for name, contents in files.items():
+              path = Path(name)
+              path.write_text(contents)
+              path.chmod(0o600)
+          PY
+
+      - name: Start PostgreSQL with Compose
+        run: docker compose --env-file .env.compose up -d --wait
+
+      - name: Apply database migrations
+        run: npm run db:migrate
+
+      - name: Apply migrations to isolated test database
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import subprocess
+
+          values = dict(
+              line.split("=", 1)
+              for line in Path(".env.migrations").read_text().splitlines()
+              if "=" in line
+          )
+          environment = os.environ.copy()
+          environment["DATABASE_MIGRATOR_URL"] = values["DATABASE_TEST_URL"]
+          subprocess.run(
+              ["npm", "run", "db:migrate", "--workspace=@ai-webmail/db"],
+              check=True,
+              env=environment,
+          )
+          PY
+
+      - name: Audit dependencies
+        run: npm audit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run PostgreSQL integration tests
+        run: npm run test:integration
+
+      - name: Install Chromium and system dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Run end-to-end and accessibility tests
+        run: npm run test:e2e
+
+      - name: Build web application
+        run: npm run build
+
+      - name: Build worker
+        run: npm run worker:build
