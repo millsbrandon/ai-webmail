@@ -216,13 +216,13 @@ Research was done from official public documentation while W01 remote setup was 
 ## W05 foundation checkpoint — 7 October 2026
 
 - Status: **review**; repository foundation only. No mail UI, mailbox connection, authentication endpoint, worker, AI, WhatsApp, or deployment has been implemented.
-- Branch: `feat/W05-security-structure`, stacked on W01 review branch `docs/W02-W03-feasibility`. W05 acceptance evidence is in this branch/PR; nothing has been merged.
+- Branch: `feat/W05-security-structure`, stacked on W01 review branch `docs/W02-W03-feasibility`; PR [#2](https://github.com/millsbrandon/ai-webmail/pull/2) is open and unmerged.
 - Changed: Node 24/npm pin, exact-pinned TypeScript development tool and lockfile; repository structure, initial threat model, dependency/license inventory, ADR-0001; persistent contributor/Copilot validation guidance and README links.
-- Tests/checks: official Node.js 24.21.0 ARM64 archive SHA-256 verified against Node.js `SHASUMS256.txt`; `npm ci --ignore-scripts` passed; `npm exec -- tsc --version` reported 7.0.2; `npm audit` reported 0 vulnerabilities; `git diff --check` passed. Gitleaks full-history and staged-diff scan required immediately before push.
+- Tests/checks: official Node.js 24.21.0 ARM64 archive SHA-256 verified against Node.js `SHASUMS256.txt`; `npm ci --ignore-scripts` passed; `npm exec -- tsc --version` reported 7.0.2; `npm audit` reported 0 vulnerabilities; `git diff --cached --check` passed. Gitleaks 8.30.1 scanned 7 commits of all Git history and the staged W05 changes; no leaks found.
 - Dependency scope: only TypeScript is currently installed. Other listed versions are public-registry candidate snapshots, not installed or security-approved; full license/advisory review is required when they enter W06/W07 manifests. Native install scripts remain disabled until separately reviewed.
 - Privacy/cost: no live mail, provider credentials, customer data, private server inventory, external AI, WhatsApp, or paid service used.
 - Rollback: revert only this task branch's commits; no migrations, external services, deployment, or server changes exist.
-- Commit / PR / remote SHA: recorded after the W05 branch is pushed and PR opened.
+- Commit / PR / remote SHA: `01e7dfab90c47ee5e99acbf03d1f1d158c6e2b8f` is verified on `origin/feat/W05-security-structure`; PR #2 is open and unmerged.
 - Next permitted task after W05 review: W06 web/worker/database skeleton and migrations. W02–W04 remain blocked and optional integrations remain disabled.
 
 ## Requirement traceability
