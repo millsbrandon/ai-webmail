@@ -4,7 +4,7 @@ Version 1.0 • 7 October 2026
 Companion: AI_WEBMAIL_DESIGN_PLAYBOOK.md. Product: standalone open-source codebase; NO OpenClaw runtime.
 
 ## Current truth
-Implementation completed: **2 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01 and W05 are done; W06 is the single active implementation task. G0 is exited for foundation work with W02–W04 explicitly blocked; AI, WhatsApp, and real mailbox integration stay disabled.
+Implementation completed: **3 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05, and W06 are done; W07 is next in sequence. G0 is exited for foundation work with W02–W04 explicitly blocked; AI, WhatsApp, and real mailbox integration stay disabled.
 
 Documentation deliverables: design playbook and this tracker authored; document checks are separate from implementation progress.
 
@@ -33,7 +33,7 @@ Gate status: IN PROGRESS. Reviewer/date: —
 | ID | Task | Status | Required completion evidence | Acceptance |
 |---|---|---|---|---|
 | W05 | Add code structure, threat model, dependency/license inventory to bootstrapped repo | done | Pinned lockfile, secret scan, architecture decision record; task branch pushed | A01 |
-| W06 | Set up web/worker/database skeleton and migrations | in_progress | Repeatable local start; least-privileged DB roles; isolated test DB | A04 |
+| W06 | Set up web/worker/database skeleton and migrations | done | Repeatable local start; least-privileged DB roles; isolated test DB | A04 |
 | W07 | Set up tests and CI | todo | Typecheck, lint, unit/integration/e2e/accessibility checks run | A01–A15 |
 | W08 | Implement design tokens and component gallery | todo | All states, both themes, icon registry, contrast report | A10 |
 
@@ -227,14 +227,14 @@ Research was done from official public documentation while W01 remote setup was 
 
 ## W06 foundation checkpoint — 7 October 2026
 
-- Status: **in progress**. Core web, worker, and database skeletons are implemented, but the required repeatable Docker Compose startup has not been tested because Docker is unavailable in this environment. Do not mark W06 complete until Compose startup is validated.
-- Branch: `feat/W06-monorepo-foundation`, based on W05 branch `feat/W05-security-structure`; commit `df7c5376f084e32d847ccd61750afc588de32063`. Stacked PR [#3](https://github.com/millsbrandon/ai-webmail/pull/3) is open and unmerged; GitHub branch SHA was verified against this commit.
+- Status: **done**. Core web, worker, and database skeletons are implemented and repeatable local Compose startup and database-role acceptance checks pass.
+- Branch: `feat/W06-monorepo-foundation`, based on W05 branch `feat/W05-security-structure`. Commit `df7c5376f084e32d847ccd61750afc588de32063` contains the foundation; stacked PR [#3](https://github.com/millsbrandon/ai-webmail/pull/3) is open and unmerged. The final W06 tracker checkpoint is pushed on the same branch; GitHub's head SHA is verified.
 - Changed: pinned npm workspaces for Next.js/React, worker, and Drizzle/PostgreSQL; local-only environment templates; loopback-only PostgreSQL Compose definition and separate migrator/runtime roles; app-schema migration and isolated `webmail_test`; database health endpoint; no-mailbox-connected landing page; graceful idle worker; development instructions; dependency inventory and tracker.
-- Validation: Node.js 24.21.0; clean `npm ci --ignore-scripts` passed; `npm run lint` passed; `npm run typecheck` passed for web/worker/database; `npm run build` passed; `npm run worker:build` passed; `npm audit` reported 0 vulnerabilities; `npm run db:generate` reported no schema changes after migration generation; `npm run db:migrate` applied successfully to both local databases. Runtime-role probes verified SELECT/INSERT/DELETE and denied DDL in `webmail` and `webmail_test`. The production server started on loopback and `/api/health` returned HTTP 200 `{"status":"ok"}`; server and worker stopped after checks. `compose.yaml` parsed as YAML, but Docker Compose behavior remains unverified.
+- Validation: Node.js 24.21.0; clean `npm ci --ignore-scripts` passed; `npm run lint` passed; `npm run typecheck` passed for web/worker/database; `npm run build` passed; `npm run worker:build` passed; `npm audit` reported 0 vulnerabilities; `npm run db:generate` reported no schema changes after migration generation. Installed the Docker CLI 29.8.2, Compose v2 5.6.0, and Colima 0.10.3; started an Apple Virtualization Framework runtime without restarting the computer and registered Homebrew's Compose plugin in the Docker CLI's existing user configuration. `docker compose --env-file .env.compose config --quiet` passed. A fresh `docker compose --env-file .env.compose up -d --wait` pulled PostgreSQL 18.6, initialized successfully, and passed its health check. The initialization script created both non-superuser roles, two migrator-owned databases, and runtime CONNECT without database CREATE. `npm run db:migrate` applied to both databases; runtime-role probes verified SELECT/INSERT/DELETE and denied DDL in both. `docker compose down` followed by `up -d --wait` recreated a healthy container while preserving both migrated schemas and the named volume. The production server started on loopback and `/api/health` returned HTTP 200 `{"status":"ok"}`; server and worker stopped after checks.
 - Dependency/license evidence: direct packages are exact-pinned; installed package SPDX metadata was checked against npm registry. Stable Drizzle ORM/Kit versions were retained; nested esbuild is patched to 0.25.12. Full `npm audit` is clean.
 - Privacy/cost: only synthetic/local setup was exercised; no live mail, customer data, credentials, external AI, WhatsApp, paid service, or deployment was used. Generated local `.env*` files remain ignored and must not be committed.
 - Secret scan: Gitleaks scanned all 11 reachable commits and the staged W06 changes; no leaks found.
-- Remaining acceptance: validate a fresh Docker Compose startup and initialization against the committed scripts. Leave W02–W04 blocked and do not begin W07 before W06 evidence is complete.
+- Acceptance: repeatable local start, least-privileged runtime role, and isolated test database are verified. W07 test and CI work may proceed on its own task branch. Leave W02–W04 blocked and keep live mailbox, AI, and WhatsApp integrations disabled.
 
 ## Requirement traceability
 | Requirement | Primary tasks | Acceptance |
