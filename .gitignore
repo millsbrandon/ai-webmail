@@ -1,0 +1,32 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+.turbo/
+
+# Local configuration and private operator data
+.env*
+!.env.example
+private/
+operator-notes*
+secrets/
+mail-data/
+attachments/
+backups/
+logs/
+
+# Local databases, mail exports, and credentials
+*.sqlite
+*.sqlite3
+*.db
+*.eml
+*.mbox
+*.pem
+*.key
+*.p12
+*.pfx
+
+# OS/editor noise
+.DS_Store
