@@ -1,0 +1,12 @@
+{
+  "name": "ai-webmail",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@11.16.0",
+  "engines": {
+    "node": "24.x"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}
