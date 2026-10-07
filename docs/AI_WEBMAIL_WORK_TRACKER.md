@@ -222,7 +222,7 @@ Research was done from official public documentation while W01 remote setup was 
 - Dependency scope: only TypeScript is currently installed. Other listed versions are public-registry candidate snapshots, not installed or security-approved; full license/advisory review is required when they enter W06/W07 manifests. Native install scripts remain disabled until separately reviewed.
 - Privacy/cost: no live mail, provider credentials, customer data, private server inventory, external AI, WhatsApp, or paid service used.
 - Rollback: revert only this task branch's commits; no migrations, external services, deployment, or server changes exist.
-- Commit / PR / remote SHA: `01e7dfab90c47ee5e99acbf03d1f1d158c6e2b8f` is verified on `origin/feat/W05-security-structure`; PR #2 is open and unmerged.
+- Commit / PR / remote SHA: W05 foundation commit `01e7dfab90c47ee5e99acbf03d1f1d158c6e2b8f`; latest tracker-evidence commit `065dc3b5f82db5d9ff16cbde81032dba013a900b`. Both are pushed; the latest SHA matches `origin/feat/W05-security-structure` and open PR #2 head. PR #2 is unmerged.
 - Next permitted task after W05 review: W06 web/worker/database skeleton and migrations. W02–W04 remain blocked and optional integrations remain disabled.
 
 ## Requirement traceability
