@@ -6,10 +6,10 @@ in [`docs/AI_WEBMAIL_DESIGN_PLAYBOOK.md`](docs/AI_WEBMAIL_DESIGN_PLAYBOOK.md).
 
 **Status: foundation work in progress.** No application features have been
 implemented or tested against a mail provider, and nothing has been deployed.
-The committed work tracker is
-[`docs/AI_WEBMAIL_WORK_TRACKER.md`](docs/AI_WEBMAIL_WORK_TRACKER.md); all 40
-implementation tasks remain incomplete until their evidence and acceptance
-criteria are met.
+The 40-task tracker records completion only when evidence and acceptance
+criteria are met; W01 and W05 are complete, and W06 foundation work is in
+progress. See
+[`docs/AI_WEBMAIL_WORK_TRACKER.md`](docs/AI_WEBMAIL_WORK_TRACKER.md).
 
 ## Project boundaries
 
@@ -33,6 +33,7 @@ criteria are met.
 - [Threat model](docs/THREAT_MODEL.md)
 - [Dependency/license inventory](docs/DEPENDENCY_INVENTORY.md)
 - [Architecture decision record](docs/decisions/ADR-0001-initial-architecture.md)
+- [Local development setup](docs/DEVELOPMENT.md)
 
 ## License
 
