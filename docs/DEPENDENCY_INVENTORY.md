@@ -1,25 +1,29 @@
 # Dependency and license inventory
 
-Review date: 7 October 2026. This is a planned direct-dependency inventory,
-not a claim that every candidate has been installed or security-approved.
-Package versions and SPDX license metadata were queried from the public npm
-registry on the review date. Recheck advisories, transitive licenses, engine
-requirements, and package provenance when each dependency is introduced.
+Review date: 7 October 2026. This inventory distinguishes installed direct dependencies from uninstalled
+candidates. Package versions and SPDX license metadata were queried from the
+public npm registry on the review date. Recheck advisories, transitive licenses,
+engine requirements, and package provenance when dependencies change.
 
-The only installed project dependency at this checkpoint is the pinned
-development tool in the root `package.json` / `package-lock.json`. TypeScript's
-lockfile includes optional platform-specific compiler packages; their registry
-metadata also declares Apache-2.0.
+Installed packages and candidates are pinned in their owning workspace's
+`package.json` and the root `package-lock.json`. TypeScript's lockfile includes
+optional platform-specific compiler packages; their registry metadata also
+declares Apache-2.0.
 
-| Component | Candidate exact version | Registry license | Status / notes |
+| Component | Pinned version | Registry license | Status / notes |
 |---|---:|---|---|
-| TypeScript | 7.0.2 | Apache-2.0 | Pinned root development tool; verify compatibility with framework types in W06. |
-| Next.js | 16.4.0 | MIT | Planned for `apps/web`; Node >=20.9 according to package metadata; peer range includes React 18.2 or React 19. |
-| React | 19.3.0 | MIT | Planned with Next.js; exact version must satisfy the selected Next.js peer range. |
-| React DOM | 19.3.0 | MIT | Planned with React and Next.js. |
-| Drizzle ORM | 0.45.3 | Apache-2.0 | Planned database access layer; migration API and PostgreSQL support to be tested in W06. |
-| Drizzle Kit | 0.31.11 | MIT | Planned development/migration tool. |
-| node-postgres (`pg`) | 8.23.1 | MIT | Planned PostgreSQL driver; pin only after connection and TLS review. |
+| TypeScript | 6.0.3 | Apache-2.0 | Installed root/workspace development tool. |
+| Next.js | 16.4.0 | MIT | Installed in `apps/web`; Node >=20.9 according to package metadata. |
+| React | 19.3.0 | MIT | Installed in `apps/web`. |
+| React DOM | 19.3.0 | MIT | Installed in `apps/web`. |
+| Drizzle ORM | 0.45.3 | Apache-2.0 | Installed database access layer; PostgreSQL migrations validated in W06. |
+| Drizzle Kit | 0.31.11 | MIT | Installed stable migration tool; nested esbuild is overridden to patched 0.25.12. CLI and migration behavior validated in W06. |
+| node-postgres (`pg`) | 8.23.1 | MIT | Installed PostgreSQL driver; local runtime and migration connections validated. |
+| `tsx` | 4.23.15 | MIT | Installed worker development runner. |
+| `@types/node` | 24.19.1 | MIT | Installed root Node.js type definitions. |
+| `@types/react` | 19.3.0 | MIT | Installed web type definitions. |
+| `@types/react-dom` | 19.3.0 | MIT | Installed web type definitions. |
+| `@types/pg` | 8.15.5 | MIT | Installed database type definitions. |
 | Zod | 4.6.5 | MIT | Planned boundary/schema validation library. |
 | ImapFlow | 2.2.8 | MIT | Planned IMAP adapter; no mailbox connection in W05. |
 | MailParser | 3.9.36 | MIT | Planned MIME parser; Node >=20 per registry metadata. |
@@ -28,6 +32,7 @@ metadata also declares Apache-2.0.
 | `argon2` | 0.45.1 | MIT | Planned native Argon2id package; platform build and resource cost need W09 testing. |
 | `sanitize-html` | 2.18.0 | MIT | Planned server-side HTML sanitizer; sanitization policy still requires security tests. |
 | Lucide React | 1.52.0 | ISC | Planned icon library; pin after confirming current icon names. |
+| Biome | 2.5.15 | MIT OR Apache-2.0 | Installed foundation linter/formatter, replacing an ESLint config whose dependency chain included a high-severity braces advisory. |
 | Radix Dialog | 1.2.0 | MIT | Candidate accessible primitive; introduce only where needed. |
 
 The exact candidate versions above are discovery snapshots, not a blanket
@@ -45,9 +50,15 @@ Before adding/updating packages:
    install scripts without review.
 4. Record exceptions and accepted risk in the tracker/decision record.
 
-Current evidence for W05: root TypeScript is exact-pinned; `npm ci
---ignore-scripts` and `npm audit` passed under Node 24.21.0 with zero reported
-vulnerabilities; full Git history and staged changes are scanned with Gitleaks.
-The listed application packages are candidates only; full transitive
-dependency/license review is repeated as packages are actually added in
-W06/W07.
+W06 dependency decision: the initial workspace audit found 9 advisories in
+eslint-config-next's `fast-glob`/`braces` chain and Drizzle Kit 0.31.11's
+deprecated `@esbuild-kit` loader. The ESLint config was removed in favor of
+Biome; TypeScript was pinned to 6.0.3; stable Drizzle Kit is retained with its
+nested esbuild overridden to 0.25.12, outside the advisory's affected range.
+The final `npm audit` reports 0 vulnerabilities.
+
+Current evidence: direct dependencies are exact-pinned; lint, typecheck,
+production web build, worker build and shutdown, local database migrations,
+runtime-role DML/DDL checks, and production health endpoint pass. Docker Compose
+startup remains unverified because Docker is unavailable; see the W06 tracker
+checkpoint.

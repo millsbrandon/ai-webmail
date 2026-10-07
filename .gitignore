@@ -9,6 +9,8 @@ coverage/
 # Local configuration and private operator data
 .env*
 !.env.example
+!.env.compose.example
+!.env.migrations.example
 private/
 operator-notes*
 secrets/

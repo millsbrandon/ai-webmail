@@ -19,7 +19,8 @@
   Admin status alone does not grant mail-content access.
 - Never commit credentials, private keys, `.env` files, customer mail,
   attachments, databases, backups, logs, or private deployment inventory.
-  Public examples use `example.com`; private operator notes stay ignored.
+  Only placeholder `.env*.example` templates are public; private operator notes
+  stay ignored.
 - Do not access or migrate live customer mail without an explicit, task-specific
   owner instruction. Use synthetic fixtures for development.
 - No additional paid subscriptions, API billing, credit purchases, or paid
@@ -50,10 +51,14 @@
 Use Node.js 24 LTS as selected in `.node-version`. The exact npm version is
 recorded in `package.json`; use the committed `package-lock.json`.
 
-At the foundation stage, run `npm ci --ignore-scripts`, `npm audit`, and
-`gitleaks git --no-banner --redact --log-opts='--all' .`. Review install scripts
-before allowing them; later native dependencies may require an explicitly
-reviewed build step. Application test commands do not exist until later tasks.
+At the foundation stage, run `npm ci --ignore-scripts`, `npm audit`,
+`npm run lint`, `npm run typecheck`, `npm run build`,
+`npm run worker:build`, relevant database migration checks, and
+`gitleaks git --no-banner --redact --log-opts='--all'` and
+`gitleaks protect --staged --no-banner --redact`. Review install scripts before
+allowing them; later native dependencies may require an explicitly reviewed
+build step. Unit, integration, and end-to-end test commands do not exist until
+their tracker task establishes them.
 For documentation-only changes, at minimum inspect the diff, run
 `git diff --check`, and scan for private identifiers/secrets before committing.
 Document exact commands and results in the tracker; do not imply unrun checks

@@ -1,0 +1,16 @@
+CREATE SCHEMA IF NOT EXISTS app AUTHORIZATION webmail_migrator;
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+GRANT USAGE ON SCHEMA app TO webmail_runtime;
+ALTER DEFAULT PRIVILEGES FOR ROLE webmail_migrator IN SCHEMA app
+	GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO webmail_runtime;
+ALTER DEFAULT PRIVILEGES FOR ROLE webmail_migrator IN SCHEMA app
+	GRANT USAGE, SELECT ON SEQUENCES TO webmail_runtime;
+
+CREATE TABLE "app"."system_settings" (
+	"key" text PRIMARY KEY NOT NULL,
+	"value" jsonb NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA app TO webmail_runtime;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA app TO webmail_runtime;

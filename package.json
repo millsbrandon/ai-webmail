@@ -6,7 +6,34 @@
   "engines": {
     "node": "24.x"
   },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
+  },
+  "scripts": {
+    "dev": "node scripts/next.mjs dev apps/web",
+    "build": "node scripts/next.mjs build apps/web",
+    "start": "node scripts/next.mjs start apps/web",
+    "lint": "biome check apps/web packages apps/worker",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:generate": "npm run db:generate --workspace=@ai-webmail/db",
+    "db:migrate": "npm run db:migrate --workspace=@ai-webmail/db",
+    "worker:dev": "node --env-file-if-exists=.env --import tsx apps/worker/src/main.ts",
+    "worker:build": "npm run build --workspace=@ai-webmail/worker",
+    "worker:start": "node --env-file-if-exists=.env apps/worker/dist/main.js"
+  },
   "devDependencies": {
-    "typescript": "7.0.2"
+    "@biomejs/biome": "2.5.15",
+    "@types/node": "24.19.1",
+    "typescript": "6.0.3"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true
   }
 }
