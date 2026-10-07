@@ -39,6 +39,29 @@
    process. It intentionally has no polling or job processors until their
    tracker tasks are implemented.
 
+## Verification
+
+With the local Compose database running and migrations applied, run:
+
+```sh
+npm run lint
+npm run typecheck
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+npm run build
+npm run worker:build
+npm audit
+```
+
+The integration test connects only to `webmail_test`. The Playwright suite
+starts the web app locally, checks the disconnected landing page and database
+health route, and runs axe checks for WCAG 2.2 A/AA and best-practice rules.
+Install the browser before the first end-to-end run with
+`npx playwright install chromium`. GitHub Actions runs the same checks using
+ephemeral credentials and the repository's Compose database; it does not
+deploy the application.
+
 `docker compose down` stops the local database but keeps its named volume.
 Do not use `docker compose down -v` unless you intentionally want to destroy
 all local development data.

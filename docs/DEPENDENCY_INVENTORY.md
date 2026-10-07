@@ -24,6 +24,9 @@ declares Apache-2.0.
 | `@types/react` | 19.3.0 | MIT | Installed web type definitions. |
 | `@types/react-dom` | 19.3.0 | MIT | Installed web type definitions. |
 | `@types/pg` | 8.15.5 | MIT | Installed database type definitions. |
+| `tsx` | 4.23.15 | MIT | Installed in the web, worker, and database workspaces to run TypeScript development/test files. |
+| Playwright Test | 1.63.0 | Apache-2.0 | Installed web development dependency for Chromium end-to-end checks. |
+| `@axe-core/playwright` | 4.13.0 | MPL-2.0 | Installed web development dependency for automated WCAG 2.2 A/AA and accessibility best-practice checks; license applies to this test-only dependency. |
 | Zod | 4.6.5 | MIT | Planned boundary/schema validation library. |
 | ImapFlow | 2.2.8 | MIT | Planned IMAP adapter; no mailbox connection in W05. |
 | MailParser | 3.9.36 | MIT | Planned MIME parser; Node >=20 per registry metadata. |
@@ -57,8 +60,10 @@ Biome; TypeScript was pinned to 6.0.3; stable Drizzle Kit is retained with its
 nested esbuild overridden to 0.25.12, outside the advisory's affected range.
 The final `npm audit` reports 0 vulnerabilities.
 
-Current evidence: direct dependencies are exact-pinned; lint, typecheck,
+Current evidence: direct dependencies are exact-pinned; W06 lint, typecheck,
 production web build, worker build and shutdown, local database migrations,
-runtime-role DML/DDL checks, and production health endpoint pass. Docker Compose
-startup remains unverified because Docker is unavailable; see the W06 tracker
-checkpoint.
+runtime-role DML/DDL checks, production health endpoint, and a fresh repeatable
+Docker Compose start pass. W07 lint/typecheck/build, four unit tests, one
+isolated-PostgreSQL integration test, three Chromium end-to-end/accessibility
+tests, and full npm audit pass locally. GitHub Actions validation is pending
+the W07 review branch.
