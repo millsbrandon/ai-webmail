@@ -50,8 +50,8 @@ test("invitation, generic login failures, session, and logout work in the browse
 		).toBeVisible();
 		await page.getByRole("link", { name: "Continue to sign in" }).click();
 		await expect(
-			page.getByRole("heading", { name: "Sign in", exact: true }),
-		).toBeVisible();
+			page.getByRole("button", { name: "Sign in with a passkey" }),
+		).toBeEnabled();
 		const loginA11y = await new AxeBuilder({ page })
 			.withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
 			.analyze();
@@ -61,23 +61,26 @@ test("invitation, generic login failures, session, and logout work in the browse
 		await page
 			.getByLabel("Password", { exact: true })
 			.fill("incorrect password");
-		await page.getByRole("button", { name: "Sign in" }).click();
+		await page.getByRole("button", { name: "Sign in", exact: true }).click();
 		await expect(
 			page.getByText("Email or password is incorrect.", { exact: true }),
 		).toBeVisible();
 		expect(await page.locator("body").innerText()).not.toContain(email);
 
 		await page.getByLabel("Password", { exact: true }).fill(password);
-		await page.getByRole("button", { name: "Sign in" }).click();
+		await page.getByRole("button", { name: "Sign in", exact: true }).click();
 		await expect(
 			page.getByText("Signed in as Synthetic E2E User."),
 		).toBeVisible();
 		await page.getByRole("button", { name: "Sign out" }).click();
 		await expect(
-			page.getByRole("heading", { name: "Sign in", exact: true }),
-		).toBeVisible();
-		const sessionResponse = await page.request.get("/api/auth/session");
-		expect(sessionResponse.status()).toBe(401);
+			page.getByRole("button", { name: "Sign in with a passkey" }),
+		).toBeEnabled();
+		const sessionStatus = await page.evaluate(async () => {
+			const response = await fetch("/api/auth/session", { cache: "no-store" });
+			return response.status;
+		});
+		expect(sessionStatus).toBe(401);
 	} finally {
 		const [user] = await database.db
 			.select({ id: users.id })

@@ -210,7 +210,6 @@ input:focus-visible {
 	cursor: pointer;
 	transition:
 		filter 150ms ease,
-		background-color 150ms ease,
 		border-color 150ms ease;
 }
 
@@ -648,8 +647,18 @@ input:focus-visible {
 
 .auth-back-link {
 	justify-self: center;
+	border: 0;
+	background: transparent;
+	color: var(--accent);
 	padding: var(--space-2);
 	font-size: 0.875rem;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.auth-back-link:disabled {
+	color: var(--text-muted);
+	cursor: not-allowed;
 }
 
 .auth-error {
@@ -668,6 +677,40 @@ input:focus-visible {
 
 .auth-success p {
 	margin: 0;
+}
+
+.auth-security {
+	display: grid;
+	gap: var(--space-3);
+	border-top: 1px solid var(--border-decorative);
+	padding-top: var(--space-4);
+}
+
+.auth-security h2,
+.auth-security h3 {
+	margin: 0;
+}
+
+.auth-security h2 {
+	font-size: 1.125rem;
+	line-height: 1.5rem;
+}
+
+.auth-security h3 {
+	font-size: 1rem;
+	line-height: 1.5rem;
+}
+
+.auth-security ul,
+.auth-security ol {
+	display: grid;
+	gap: var(--space-2);
+	margin: 0;
+	padding-left: var(--space-6);
+}
+
+.auth-security li {
+	overflow-wrap: anywhere;
 }
 
 @media (max-width: 540px) {

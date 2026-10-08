@@ -7,8 +7,10 @@ import { hashToken, newCsrfToken } from "./csrf";
 export const idleSessionMs = 12 * 60 * 60 * 1000;
 export const absoluteSessionMs = 7 * 24 * 60 * 60 * 1000;
 
+type SessionWriter = Pick<WebmailDatabase, "insert">;
+
 export async function createSession(
-	db: WebmailDatabase,
+	db: SessionWriter,
 	userId: string,
 	now = new Date(),
 ) {
@@ -22,6 +24,7 @@ export async function createSession(
 		csrfTokenHash: hashToken(csrfToken),
 		createdAt: now,
 		lastSeenAt: now,
+		lastAuthenticatedAt: now,
 		idleExpiresAt: new Date(now.getTime() + idleSessionMs),
 		absoluteExpiresAt,
 	});
@@ -43,6 +46,7 @@ export async function getActiveSession(
 			displayName: users.displayName,
 			csrfTokenHash: authSessions.csrfTokenHash,
 			absoluteExpiresAt: authSessions.absoluteExpiresAt,
+			lastAuthenticatedAt: authSessions.lastAuthenticatedAt,
 		})
 		.from(authSessions)
 		.innerJoin(users, eq(authSessions.userId, users.id))

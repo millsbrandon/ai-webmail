@@ -38,8 +38,11 @@
    PostgreSQL connection is reachable. It never returns connection details.
    The static design-system gallery is available at
    `http://localhost:3000/design-system`; it uses synthetic examples only.
-   Set `APP_ORIGIN` to    the exact browser origin used for the app. Mutation routes reject requests
-   without that exact `Origin`; production origins must use HTTPS.
+   Set `APP_ORIGIN` to the exact browser origin used for the app. Mutation
+   routes reject requests without that exact `Origin`; production origins must
+   use HTTPS. WebAuthn derives its relying-party ID from this origin's
+   hostname. A deployed hostname must be finalized before users enroll
+   passkeys; use separate origins and credentials for localhost and staging.
 7. In a separate terminal, `npm run worker:dev` starts the bounded worker
    process. It intentionally has no polling or job processors until their
    tracker tasks are implemented.
@@ -66,8 +69,11 @@ the landing page and both light/dark component gallery panels. The unit suite
 computes contrast ratios directly from the semantic CSS tokens.
 Authentication tests create only synthetic accounts and invitations in
 `webmail_test`; they cover invitation redemption/replay, password hashing,
-generic login errors, account cooldown, sessions, CSRF/origin checks, and the
-browser sign-in/sign-out flow.
+generic login errors, account cooldown, sessions, CSRF/origin checks,
+session-bound/replay-resistant WebAuthn challenges, recovery-code rotation and
+single-use sign-in, and browser passkey/recovery flows. The Chromium virtual
+authenticator is protocol-test evidence only, not evidence of physical
+iOS/macOS, Android, or Windows passkey support.
 Install the browser before the first end-to-end run with
 `npx playwright install chromium`. GitHub Actions runs the same checks using
 ephemeral credentials and the repository's Compose database; it does not
@@ -79,10 +85,11 @@ all local development data.
 
 ## Current scope
 
-The application remains a local development foundation. W09 adds invite-only
-password authentication for synthetic users, but has no public invitation
-issuance, production provisioning, passkeys, recovery, mailbox memberships, or
-mail access. Do not use real user accounts. There are no mailbox credentials,
-mail content, synchronization jobs, send routes, or external integrations.
-The public landing page explicitly states that no mailbox is connected. Use
-synthetic data only.
+The application remains a local development foundation. W09/W10 provide
+invite-only password/passkey authentication and one-time recovery codes for
+synthetic users, but there is no public invitation issuance, production
+provisioning, verified personal recovery address, source/IP rate limiter, or
+mailbox membership/mail access. Do not use real user accounts. There are no
+mailbox credentials, mail content, synchronization jobs, send routes, or
+external integrations. The public landing page explicitly states that no
+mailbox is connected. Use synthetic data only.

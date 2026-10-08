@@ -1,12 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-	csrfCookieName,
-	hasValidCsrf,
-	hasValidOrigin,
-	sessionCookieName,
-} from "../../../../lib/auth/csrf";
+import { hasValidCsrf, hasValidOrigin } from "../../../../lib/auth/csrf";
 import { authenticate } from "../../../../lib/auth/login";
 import { readBoundedJsonBody } from "../../../../lib/auth/request-body";
+import { setSessionCookies } from "../../../../lib/auth/session-cookies";
 import { getDatabase } from "../../../../lib/database";
 
 export const runtime = "nodejs";
@@ -67,26 +63,7 @@ export async function POST(request: NextRequest) {
 			},
 			{ headers: { "Cache-Control": "no-store" } },
 		);
-		const maxAge = Math.floor(
-			(result.session.absoluteExpiresAt.getTime() - Date.now()) / 1000,
-		);
-
-		response.cookies.set(sessionCookieName, result.session.sessionToken, {
-			httpOnly: true,
-			maxAge,
-			path: "/",
-			sameSite: "lax",
-			secure: true,
-		});
-		response.cookies.set(csrfCookieName, result.session.csrfToken, {
-			httpOnly: false,
-			maxAge,
-			path: "/",
-			sameSite: "strict",
-			secure: true,
-		});
-
-		return response;
+		return setSessionCookies(response, result.session);
 	} catch (error) {
 		console.error("Password authentication failed unexpectedly.", error);
 		return NextResponse.json(

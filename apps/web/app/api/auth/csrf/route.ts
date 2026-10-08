@@ -6,6 +6,7 @@ import {
 } from "../../../../lib/auth/csrf";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
 	const existingToken = cookieValue(request, csrfCookieName);
