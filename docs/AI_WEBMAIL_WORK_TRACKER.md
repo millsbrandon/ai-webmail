@@ -4,7 +4,7 @@ Version 1.0 • 7 October 2026
 Companion: AI_WEBMAIL_DESIGN_PLAYBOOK.md. Product: standalone open-source codebase; NO OpenClaw runtime.
 
 ## Current truth
-Implementation completed: **4 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05, W06, and W07 are done; W08 is the single active implementation task. G0 is exited for foundation work with W02–W04 explicitly blocked; AI, WhatsApp, and real mailbox integration stay disabled.
+Implementation completed: **5 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05, W06, W07, and W08 are done. G0 is exited for foundation work with W02–W04 explicitly blocked; G1 remains in progress pending its exit review before W09. AI, WhatsApp, and real mailbox integration stay disabled.
 
 Documentation deliverables: design playbook and this tracker authored; document checks are separate from implementation progress.
 
@@ -35,7 +35,7 @@ Gate status: IN PROGRESS. Reviewer/date: —
 | W05 | Add code structure, threat model, dependency/license inventory to bootstrapped repo | done | Pinned lockfile, secret scan, architecture decision record; task branch pushed | A01 |
 | W06 | Set up web/worker/database skeleton and migrations | done | Repeatable local start; least-privileged DB roles; isolated test DB | A04 |
 | W07 | Set up tests and CI | done | Typecheck, lint, unit/integration/e2e/accessibility checks run | A01–A15 |
-| W08 | Implement design tokens and component gallery | review | All states, both themes, icon registry, contrast report | A10 |
+| W08 | Implement design tokens and component gallery | done | All states, both themes, icon registry, contrast report | A10 |
 
 Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate signature and release impact recorded before next phase.
 
@@ -249,15 +249,15 @@ Research was done from official public documentation while W01 remote setup was 
 
 ## W08 design tokens and component gallery checkpoint — 8 October 2026
 
-- Status: **review**. Owner: project implementation. Acceptance: A10.
+- Status: **done**. Owner: project implementation. Acceptance: A10.
 - Dependency/gate: W07 is complete on PR #4 after push and pull-request CI both passed on `c2de68162987fe809600a4454fbdf55a24164170`. G1 remains in progress; do not start G2 work until W08 evidence and the G1 gate are reviewed.
-- Branch: `feat/W08-design-system`, based on verified W07 branch head `c2de68162987fe809600a4454fbdf55a24164170`; implementation commit `417e7552d210e99a8659359796596f095c30d055`. Stacked PR [#5](https://github.com/millsbrandon/ai-webmail/pull/5) targets W07 PR #4, is open and unmerged, and the branch remote SHA was verified. Do not merge earlier stacked PRs as a shortcut.
+- Branch: `feat/W08-design-system`, based on verified W07 branch head `c2de68162987fe809600a4454fbdf55a24164170`; implementation commit `417e7552d210e99a8659359796596f095c30d055`; tracker evidence commit `39db9d6b87c3d9ab1d774598b07d50b3f315c551`. Stacked PR [#5](https://github.com/millsbrandon/ai-webmail/pull/5) targets W07 PR #4, is open and unmerged, and the branch remote SHA was verified. Do not merge earlier stacked PRs as a shortcut.
 - Changed: replaced page-level color literals with semantic theme, spacing, radius, and focus tokens; added a responsive `/design-system` page with light and dark component examples for default/hover/focus/selected/disabled/loading/error/empty/offline/permission-revoked/stale states; added a typed, named Lucide SVG icon registry pinned to 1.53.0; linked the gallery from the foundation landing page; added CSS-token contrast tests and [the W08 contrast report](./evidence/W08/2026-10-08/contrast-report.md); extended browser tests for gallery accessibility, keyboard focus, and target viewport widths; documented the gallery, updated the dependency/license inventory, and added the Lucide package/lock entry.
 - Validation: Node.js 24.21.0 and exact npm 11.16.0. `npm ci --ignore-scripts` passed with 0 vulnerabilities; `npm run lint` and `npm run typecheck` passed; `npm run test` passed (5 unit, 1 isolated-PostgreSQL integration, 5 Chromium end-to-end/accessibility tests); axe reported zero violations on the gallery and landing page; browser page-overflow checks passed at 320, 375, 390, 768, 1024, 1280, 1440, and 1920 CSS pixels; the unit contrast test verified 23 token pairs per theme (minimum text 6.20:1 light / 7.76:1 dark, control boundary 4.55:1 / 6.66:1, focus 6.41:1 / 9.47:1); `npm run build` and `npm run worker:build` passed; `npm audit` reported 0 vulnerabilities. The rendered gallery was visually reviewed. `git diff --check` passed and Gitleaks found no leaks in 18 reachable commits or staged changes. The local PostgreSQL service was stopped without deleting its named volume; port 5432 is free.
-- GitHub: push run [#37763661944](https://github.com/millsbrandon/ai-webmail/actions/runs/37763661944) was in progress and PR check run [#37763676915](https://github.com/millsbrandon/ai-webmail/actions/runs/37763676915) was queued on implementation SHA `417e7552d210e99a8659359796596f095c30d055` at the checkpoint. Local validation, diff review, and secret scans passed. Do not mark W08 done until GitHub Actions completes successfully and the final branch SHA is verified.
+- GitHub: push run [#37763722420](https://github.com/millsbrandon/ai-webmail/actions/runs/37763722420) and PR run [#37763727783](https://github.com/millsbrandon/ai-webmail/actions/runs/37763727783) both passed on tracker commit `39db9d6b87c3d9ab1d774598b07d50b3f315c551`; `gh pr view` and `git ls-remote` verified the open PR head and exact remote SHA. PR #5 remains unmerged. G1 phase exit/sign-off is still pending before W09.
 - Privacy/cost: static synthetic examples only. No mailbox data, provider access, AI/WhatsApp service, paid dependency, or deployment.
 - Rollback: revert only W08 commits on its task branch; no database or external-service changes are planned.
-- Reviewer/gate: W08 awaits PR review and a verified GitHub Actions result. G1 exit/sign-off is still required before W09 begins on its own branch. W02–W04 and all integration gates remain unchanged.
+- Reviewer/gate: implementation, documentation, acceptance evidence, and CI are complete for W08. The PR remains open for owner review; G1 exit/sign-off is still required before W09 begins on its own branch. W02–W04 and all integration gates remain unchanged.
 
 ## Requirement traceability
 | Requirement | Primary tasks | Acceptance |
