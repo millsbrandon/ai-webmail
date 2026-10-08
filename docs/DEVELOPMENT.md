@@ -30,6 +30,7 @@
 
    ```sh
    npm run db:migrate
+   npm run db:migrate:test
    ```
 
 6. Start the web app with `npm run dev`, then visit `http://localhost:3000`.
@@ -37,6 +38,8 @@
    PostgreSQL connection is reachable. It never returns connection details.
    The static design-system gallery is available at
    `http://localhost:3000/design-system`; it uses synthetic examples only.
+   Set `APP_ORIGIN` to    the exact browser origin used for the app. Mutation routes reject requests
+   without that exact `Origin`; production origins must use HTTPS.
 7. In a separate terminal, `npm run worker:dev` starts the bounded worker
    process. It intentionally has no polling or job processors until their
    tracker tasks are implemented.
@@ -61,6 +64,10 @@ starts the web app locally, checks the disconnected landing page and database
 health route, and runs axe checks for WCAG 2.2 A/AA and best-practice rules on
 the landing page and both light/dark component gallery panels. The unit suite
 computes contrast ratios directly from the semantic CSS tokens.
+Authentication tests create only synthetic accounts and invitations in
+`webmail_test`; they cover invitation redemption/replay, password hashing,
+generic login errors, account cooldown, sessions, CSRF/origin checks, and the
+browser sign-in/sign-out flow.
 Install the browser before the first end-to-end run with
 `npx playwright install chromium`. GitHub Actions runs the same checks using
 ephemeral credentials and the repository's Compose database; it does not
@@ -72,7 +79,10 @@ all local development data.
 
 ## Current scope
 
-This is only the runnable foundation. There are no user accounts, mailbox
-credentials, mail content, synchronization jobs, send routes, or external
-integrations yet. The public landing page explicitly states that no mailbox is
-connected. Use synthetic data only.
+The application remains a local development foundation. W09 adds invite-only
+password authentication for synthetic users, but has no public invitation
+issuance, production provisioning, passkeys, recovery, mailbox memberships, or
+mail access. Do not use real user accounts. There are no mailbox credentials,
+mail content, synchronization jobs, send routes, or external integrations.
+The public landing page explicitly states that no mailbox is connected. Use
+synthetic data only.

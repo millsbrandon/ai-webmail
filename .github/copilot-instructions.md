@@ -7,6 +7,14 @@ at the start of every session. The tracker is the authoritative ordered task
 list; resume from its last committed state and work only the next unblocked
 task.
 
+Operate autonomously and keep implementation moving without routine owner
+check-ins or ceremonial sign-off. Use safe defaults, review evidence against
+the written phase criteria, record technical gate decisions, and proceed to
+the next unblocked local task. This does not authorize live mailbox/customer
+data access, sending mail, paid services, production changes/deployment, or
+enabling AI/WhatsApp; those explicit safety and feasibility gates remain in
+force. Continue other permitted work rather than waiting on an unrelated gate.
+
 The project is standalone and must not depend on OpenClaw. Use Node.js 24 LTS
 from `.node-version` and the exact npm/lockfile pins. Protect mailbox
 boundaries at every server-side surface, use synthetic mail for development,

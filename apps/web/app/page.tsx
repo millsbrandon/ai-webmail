@@ -18,6 +18,9 @@ export default function Home() {
 				<Link className="button button-primary" href="/design-system">
 					View component gallery
 				</Link>
+				<Link className="button button-secondary" href="/login">
+					Sign in
+				</Link>
 			</div>
 		</main>
 	);

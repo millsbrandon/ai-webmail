@@ -1,33 +1,18 @@
-import { createDatabase } from "@ai-webmail/db/client";
 import { NextResponse } from "next/server";
+import { getDatabase } from "../../../lib/database";
 
 export const runtime = "nodejs";
 
-declare global {
-	var webmailDatabase:
-		| (ReturnType<typeof createDatabase> & { connectionString: string })
-		| undefined;
-}
-
 export async function GET() {
-	const connectionString = process.env.DATABASE_URL;
-
-	if (!connectionString) {
+	if (!process.env.DATABASE_URL) {
 		return NextResponse.json(
 			{ status: "not_configured" },
 			{ status: 503, headers: { "Cache-Control": "no-store" } },
 		);
 	}
 
-	if (!globalThis.webmailDatabase) {
-		globalThis.webmailDatabase = {
-			...createDatabase(connectionString),
-			connectionString,
-		};
-	}
-
 	try {
-		await globalThis.webmailDatabase.pool.query("SELECT 1");
+		await getDatabase().pool.query("SELECT 1");
 		return NextResponse.json(
 			{ status: "ok" },
 			{ headers: { "Cache-Control": "no-store" } },

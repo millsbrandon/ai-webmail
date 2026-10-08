@@ -16,7 +16,7 @@ declares Apache-2.0.
 | Next.js | 16.4.0 | MIT | Installed in `apps/web`; Node >=20.9 according to package metadata. |
 | React | 19.3.0 | MIT | Installed in `apps/web`. |
 | React DOM | 19.3.0 | MIT | Installed in `apps/web`. |
-| Drizzle ORM | 0.45.3 | Apache-2.0 | Installed database access layer; PostgreSQL migrations validated in W06. |
+| Drizzle ORM | 0.45.3 | Apache-2.0 | Installed database access layer in `packages/db` and direct W09 query support in `apps/web`; PostgreSQL migrations validated in W06/W09. |
 | Drizzle Kit | 0.31.11 | MIT | Installed stable migration tool; nested esbuild is overridden to patched 0.25.12. CLI and migration behavior validated in W06. |
 | node-postgres (`pg`) | 8.23.1 | MIT | Installed PostgreSQL driver; local runtime and migration connections validated. |
 | `tsx` | 4.23.15 | MIT | Installed worker development runner. |
@@ -27,12 +27,12 @@ declares Apache-2.0.
 | `tsx` | 4.23.15 | MIT | Installed in the web, worker, and database workspaces to run TypeScript development/test files. |
 | Playwright Test | 1.63.0 | Apache-2.0 | Installed web development dependency for Chromium end-to-end checks. |
 | `@axe-core/playwright` | 4.13.0 | MPL-2.0 | Installed web development dependency for automated WCAG 2.2 A/AA and accessibility best-practice checks; license applies to this test-only dependency. |
+| `argon2` | 0.45.1 | MIT | Installed for Argon2id password hashing; Node-API prebuild availability and native install behavior reviewed during W09. |
 | Zod | 4.6.5 | MIT | Planned boundary/schema validation library. |
 | ImapFlow | 2.2.8 | MIT | Planned IMAP adapter; no mailbox connection in W05. |
 | MailParser | 3.9.36 | MIT | Planned MIME parser; Node >=20 per registry metadata. |
 | Nodemailer | 10.0.16 | MIT-0 | Planned SMTP adapter; manual sends remain out of scope in W05. |
 | SimpleWebAuthn server | 14.0.3 | MIT | Planned WebAuthn verifier; actual origin/RP ID remain unconfigured pending W04. |
-| `argon2` | 0.45.1 | MIT | Planned native Argon2id package; platform build and resource cost need W09 testing. |
 | `sanitize-html` | 2.18.0 | MIT | Planned server-side HTML sanitizer; sanitization policy still requires security tests. |
 | Lucide React | 1.53.0 | ISC | Installed in `apps/web` for the named SVG icon registry; published 8 October 2026, React 19 peer-compatible, and icon exports are checked by TypeScript. |
 | Biome | 2.5.15 | MIT OR Apache-2.0 | Installed foundation linter/formatter, replacing an ESLint config whose dependency chain included a high-severity braces advisory. |
@@ -66,6 +66,13 @@ runtime-role DML/DDL checks, production health endpoint, and a fresh repeatable
 Docker Compose start pass. W07 lint/typecheck/build, four unit tests, one
 isolated-PostgreSQL integration test, three Chromium end-to-end/accessibility
 tests, and full npm audit passed locally and in GitHub Actions on W07 commit
-`c2de68162987fe809600a4454fbdf55a24164170`. W08 is adding the pinned Lucide
-React runtime dependency; its final lockfile/audit evidence is recorded by the
-W08 checkpoint.
+`c2de68162987fe809600a4454fbdf55a24164170`. W08 added the pinned Lucide React
+runtime dependency; its final lockfile/audit evidence is recorded by the W08
+checkpoint.
+
+W09 adds exact-pinned Argon2id password hashing and direct Drizzle query use in
+the web workspace. A clean `npm ci --ignore-scripts`, `npm audit`, lint,
+typecheck, unit/integration/end-to-end tests, web build, and worker build pass
+locally on Node.js 24.21.0. Auth integration/browser tests use only synthetic
+users and `webmail_test`; see the W09 tracker record for local validation
+evidence and current checkpoint state.
