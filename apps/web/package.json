@@ -7,12 +7,13 @@
 		"build": "node ../../scripts/next.mjs build apps/web",
 		"start": "node ../../scripts/next.mjs start apps/web",
 		"typecheck": "tsc --noEmit",
-		"test:unit": "tsx --test app/api/health/route.unit.test.ts",
+		"test:unit": "tsx --test app/api/health/route.unit.test.ts app/design-system/contrast.unit.test.ts",
 		"test:integration": "node --env-file-if-exists=../../.env --import tsx --test app/api/health/route.integration.test.ts",
 		"test:e2e": "playwright test --config=playwright.config.mts"
 	},
 	"dependencies": {
 		"@ai-webmail/db": "*",
+		"lucide-react": "1.53.0",
 		"next": "16.4.0",
 		"react": "19.3.0",
 		"react-dom": "19.3.0"
