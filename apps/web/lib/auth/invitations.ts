@@ -115,6 +115,7 @@ export async function acceptInvitation(
 		}
 
 		await transaction.insert(users).values({
+			userHandle: randomBytes(32).toString("base64url"),
 			email: invitation.email,
 			displayName,
 			passwordHash,

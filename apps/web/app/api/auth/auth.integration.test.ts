@@ -6,6 +6,8 @@ import {
 	authSessions,
 	invitations,
 	loginAttempts,
+	passkeyChallenges,
+	recoveryCodes,
 	users,
 } from "@ai-webmail/db/schema";
 import { eq } from "drizzle-orm";
@@ -20,6 +22,8 @@ import {
 	createInvitation,
 } from "../../../lib/auth/invitations";
 import { authenticate, loginPolicy } from "../../../lib/auth/login";
+import { consumePasskeyChallenge } from "../../../lib/auth/passkeys";
+import { replaceRecoveryCodes } from "../../../lib/auth/recovery-codes";
 import {
 	getActiveSession,
 	idleSessionMs,
@@ -29,6 +33,10 @@ import { GET as getCsrf } from "./csrf/route";
 import { POST as acceptInvite } from "./invitations/accept/route";
 import { POST as login } from "./login/route";
 import { POST as logout } from "./logout/route";
+import { POST as authenticationOptions } from "./passkeys/authentication/options/route";
+import { POST as registrationOptions } from "./passkeys/registration/options/route";
+import { POST as recoveryLogin } from "./recovery/login/route";
+import { POST as recoveryCodeRotation } from "./recovery-codes/route";
 import { GET as getSession } from "./session/route";
 
 const originalDatabaseUrl = process.env.DATABASE_URL;
@@ -47,6 +55,7 @@ process.env.APP_ORIGIN = appOrigin;
 
 const database = testDbUrl ? createDatabase(testDbUrl.toString()) : undefined;
 const syntheticEmails: string[] = [];
+const syntheticChallenges: string[] = [];
 
 function uniqueEmail() {
 	const email = `auth-${crypto.randomUUID()}@example.test`;
@@ -57,8 +66,9 @@ function uniqueEmail() {
 function csrfRequest(
 	path: string,
 	token: string,
-	body?: Record<string, string>,
+	body?: Record<string, unknown>,
 	sessionToken?: string,
+	origin = appOrigin,
 ) {
 	return new NextRequest(`${appOrigin}${path}`, {
 		method: "POST",
@@ -68,7 +78,7 @@ function csrfRequest(
 				`${csrfCookieName}=${token}`,
 				...(sessionToken ? [`${sessionCookieName}=${sessionToken}`] : []),
 			].join("; "),
-			origin: appOrigin,
+			origin,
 			"x-csrf-token": token,
 		},
 		body: body ? JSON.stringify(body) : undefined,
@@ -99,6 +109,11 @@ after(async () => {
 			await database.db
 				.delete(loginAttempts)
 				.where(eq(loginAttempts.accountHash, hashToken(email)));
+		}
+		for (const id of syntheticChallenges) {
+			await database.db
+				.delete(passkeyChallenges)
+				.where(eq(passkeyChallenges.id, id));
 		}
 		await database.pool.end();
 	}
@@ -432,6 +447,229 @@ test("expired invitations cannot create accounts", async () => {
 		.from(users)
 		.where(eq(users.email, email));
 	assert.equal(matchingUsers.length, 0);
+});
+
+test("passkey challenges bind to purpose, user, and session and are consumed once", async () => {
+	assert.ok(database);
+	const email = uniqueEmail();
+	const invitation = await createInvitation(database.db, email, null);
+	assert.equal(
+		await acceptInvitation(
+			database.db,
+			invitation.token,
+			email,
+			"Passkey Test User",
+			password,
+		),
+		true,
+	);
+	const authentication = await authenticate(database.db, email, password);
+	assert.ok(authentication);
+	const activeAuthentication = await getActiveSession(
+		database.db,
+		authentication.session.sessionToken,
+	);
+	assert.ok(activeAuthentication);
+
+	const wrongOrigin = await registrationOptions(
+		csrfRequest(
+			"/api/auth/passkeys/registration/options",
+			authentication.session.csrfToken,
+			{},
+			authentication.session.sessionToken,
+			"https://attacker.example.test",
+		),
+	);
+	assert.equal(wrongOrigin.status, 403);
+
+	const optionsResponse = await registrationOptions(
+		csrfRequest(
+			"/api/auth/passkeys/registration/options",
+			authentication.session.csrfToken,
+			{},
+			authentication.session.sessionToken,
+		),
+	);
+	assert.equal(optionsResponse.status, 200);
+	const registration = (await optionsResponse.json()) as {
+		challengeId: string;
+		options: {
+			challenge: string;
+			rp: { id: string };
+			authenticatorSelection: {
+				residentKey: string;
+				userVerification: string;
+			};
+		};
+	};
+	assert.equal(registration.options.rp.id, "localhost");
+	assert.equal(
+		registration.options.authenticatorSelection.residentKey,
+		"required",
+	);
+	assert.equal(
+		registration.options.authenticatorSelection.userVerification,
+		"required",
+	);
+	syntheticChallenges.push(registration.challengeId);
+
+	const [stored] = await database.db
+		.select()
+		.from(passkeyChallenges)
+		.where(eq(passkeyChallenges.id, registration.challengeId))
+		.limit(1);
+	assert.equal(stored.purpose, "registration");
+	assert.equal(stored.userId, authentication.user.id);
+	assert.equal(stored.sessionId, activeAuthentication.id);
+	assert.equal(stored.challengeHash, hashToken(registration.options.challenge));
+	assert.equal(
+		stored.expiresAt.getTime() - stored.createdAt.getTime(),
+		5 * 60 * 1000,
+	);
+
+	assert.equal(
+		await consumePasskeyChallenge(
+			database.db,
+			registration.challengeId,
+			"registration",
+			{ userId: crypto.randomUUID(), sessionId: activeAuthentication.id },
+		),
+		undefined,
+	);
+	assert.equal(
+		await consumePasskeyChallenge(
+			database.db,
+			registration.challengeId,
+			"registration",
+			{ userId: authentication.user.id, sessionId: crypto.randomUUID() },
+		),
+		undefined,
+	);
+	const consumed = await consumePasskeyChallenge(
+		database.db,
+		registration.challengeId,
+		"registration",
+		{ userId: authentication.user.id, sessionId: activeAuthentication.id },
+	);
+	assert.ok(consumed);
+	assert.equal(
+		await consumePasskeyChallenge(
+			database.db,
+			registration.challengeId,
+			"registration",
+			{ userId: authentication.user.id, sessionId: activeAuthentication.id },
+		),
+		undefined,
+	);
+
+	const csrfResponse = await getCsrf(csrfGetRequest());
+	const csrfToken = (await csrfResponse.json()).csrfToken as string;
+	const authOptionsResponse = await authenticationOptions(
+		csrfRequest("/api/auth/passkeys/authentication/options", csrfToken, {}),
+	);
+	assert.equal(authOptionsResponse.status, 200);
+	const authOptions = (await authOptionsResponse.json()) as {
+		challengeId: string;
+		options: { challenge: string; userVerification: string; rpId: string };
+	};
+	syntheticChallenges.push(authOptions.challengeId);
+	assert.equal(authOptions.options.userVerification, "required");
+	assert.equal(authOptions.options.rpId, "localhost");
+	const [storedAuthChallenge] = await database.db
+		.select()
+		.from(passkeyChallenges)
+		.where(eq(passkeyChallenges.id, authOptions.challengeId))
+		.limit(1);
+	assert.equal(storedAuthChallenge.purpose, "authentication");
+	assert.equal(storedAuthChallenge.userId, null);
+	assert.equal(storedAuthChallenge.sessionId, null);
+	assert.equal(
+		storedAuthChallenge.challengeHash,
+		hashToken(authOptions.options.challenge),
+	);
+
+	await database.db
+		.update(passkeyChallenges)
+		.set({ expiresAt: new Date(Date.now() - 1000) })
+		.where(eq(passkeyChallenges.id, authOptions.challengeId));
+	assert.equal(
+		await consumePasskeyChallenge(
+			database.db,
+			authOptions.challengeId,
+			"authentication",
+			undefined,
+		),
+		undefined,
+	);
+});
+
+test("recovery codes are stored hashed, rotate atomically, and only sign in once", async () => {
+	assert.ok(database);
+	const email = uniqueEmail();
+	const invitation = await createInvitation(database.db, email, null);
+	assert.equal(
+		await acceptInvitation(
+			database.db,
+			invitation.token,
+			email,
+			"Recovery Test User",
+			password,
+		),
+		true,
+	);
+	const authentication = await authenticate(database.db, email, password);
+	assert.ok(authentication);
+
+	const created = await recoveryCodeRotation(
+		csrfRequest(
+			"/api/auth/recovery-codes",
+			authentication.session.csrfToken,
+			{},
+			authentication.session.sessionToken,
+		),
+	);
+	assert.equal(created.status, 200);
+	const createdBody = (await created.json()) as { codes: string[] };
+	assert.equal(createdBody.codes.length, 10);
+	const [storedCode] = await database.db
+		.select()
+		.from(recoveryCodes)
+		.where(eq(recoveryCodes.userId, authentication.user.id))
+		.limit(1);
+	assert.notEqual(storedCode.codeHash, createdBody.codes[0]);
+	assert.equal(storedCode.codeHash, hashToken(createdBody.codes[0]));
+
+	const nextCodes = await replaceRecoveryCodes(
+		database.db,
+		authentication.user.id,
+	);
+	assert.equal(nextCodes.length, 10);
+	const supersededCode = await recoveryLogin(
+		csrfRequest("/api/auth/recovery/login", authentication.session.csrfToken, {
+			code: createdBody.codes[1],
+		}),
+	);
+	assert.equal(supersededCode.status, 401);
+
+	const signIn = await recoveryLogin(
+		csrfRequest("/api/auth/recovery/login", authentication.session.csrfToken, {
+			code: nextCodes[0].toUpperCase(),
+		}),
+	);
+	assert.equal(signIn.status, 200);
+	assert.equal(signIn.cookies.get(sessionCookieName)?.value.length, 43);
+	assert.deepEqual((await signIn.json()).user, {
+		email,
+		displayName: "Recovery Test User",
+	});
+
+	const replay = await recoveryLogin(
+		csrfRequest("/api/auth/recovery/login", authentication.session.csrfToken, {
+			code: nextCodes[0].toUpperCase(),
+		}),
+	);
+	assert.equal(replay.status, 401);
+	assert.deepEqual(await replay.json(), await supersededCode.clone().json());
 });
 
 function createHashEmail(email: string) {

@@ -4,6 +4,7 @@ import { getActiveSession } from "../../../../lib/auth/sessions";
 import { getDatabase } from "../../../../lib/database";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
 	const sessionToken = cookieValue(request, sessionCookieName);

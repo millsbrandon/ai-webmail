@@ -32,7 +32,8 @@ declares Apache-2.0.
 | ImapFlow | 2.2.8 | MIT | Planned IMAP adapter; no mailbox connection in W05. |
 | MailParser | 3.9.36 | MIT | Planned MIME parser; Node >=20 per registry metadata. |
 | Nodemailer | 10.0.16 | MIT-0 | Planned SMTP adapter; manual sends remain out of scope in W05. |
-| SimpleWebAuthn server | 14.0.3 | MIT | Planned WebAuthn verifier; actual origin/RP ID remain unconfigured pending W04. |
+| SimpleWebAuthn server | 14.0.3 | MIT | Installed in `apps/web` for WebAuthn registration/assertion verification; RP ID derives from `APP_ORIGIN`; no production host is configured. |
+| SimpleWebAuthn browser | 14.0.0 | MIT | Installed in `apps/web` for feature-detected browser registration/assertion flows. |
 | `sanitize-html` | 2.18.0 | MIT | Planned server-side HTML sanitizer; sanitization policy still requires security tests. |
 | Lucide React | 1.53.0 | ISC | Installed in `apps/web` for the named SVG icon registry; published 8 October 2026, React 19 peer-compatible, and icon exports are checked by TypeScript. |
 | Biome | 2.5.15 | MIT OR Apache-2.0 | Installed foundation linter/formatter, replacing an ESLint config whose dependency chain included a high-severity braces advisory. |

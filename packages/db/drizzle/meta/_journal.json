@@ -15,6 +15,13 @@
 			"when": 1791456006301,
 			"tag": "0001_abnormal_frank_castle",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1791457824691,
+			"tag": "0002_futuristic_husk",
+			"breakpoints": true
 		}
 	]
 }

@@ -71,3 +71,21 @@ services (currently blocked); public GitHub repository.
 
 This threat model must evolve with the implementation and be reviewed against
 actual routes, jobs, schemas, and tests before any live mailbox is connected.
+
+## W10 authentication implementation notes
+
+- WebAuthn RP ID is derived from the exact configured `APP_ORIGIN`; production
+  requires HTTPS. Registration challenges are hash-only, expire after five
+  minutes, and are atomically consumed with their user/session/purpose binding.
+- Passkey assertion verification requires the expected origin, RP ID,
+  discoverable user handle, user verification, and the stored public key.
+  Counter updates use compare-and-set; zero counters remain allowed for
+  synced authenticators.
+- Recovery codes contain 128 bits of random entropy. Only SHA-256 hashes are
+  stored; a transaction locks the account while rotating codes or consuming
+  one, and a consumed code cannot create another session.
+- Local Chromium virtual-authenticator results do not establish physical
+  device compatibility. Real iOS/macOS, Android, and Windows testing, source/IP
+  rate limiting, owner recovery preparation, and production host provisioning
+  remain release blockers. No verified personal recovery-address workflow is
+  available, and authentication is not provisioned for live users.
