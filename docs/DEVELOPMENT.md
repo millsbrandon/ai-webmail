@@ -35,6 +35,8 @@
 6. Start the web app with `npm run dev`, then visit `http://localhost:3000`.
    `GET /api/health` reports only whether the app is configured and its
    PostgreSQL connection is reachable. It never returns connection details.
+   The static design-system gallery is available at
+   `http://localhost:3000/design-system`; it uses synthetic examples only.
 7. In a separate terminal, `npm run worker:dev` starts the bounded worker
    process. It intentionally has no polling or job processors until their
    tracker tasks are implemented.
@@ -56,7 +58,9 @@ npm audit
 
 The integration test connects only to `webmail_test`. The Playwright suite
 starts the web app locally, checks the disconnected landing page and database
-health route, and runs axe checks for WCAG 2.2 A/AA and best-practice rules.
+health route, and runs axe checks for WCAG 2.2 A/AA and best-practice rules on
+the landing page and both light/dark component gallery panels. The unit suite
+computes contrast ratios directly from the semantic CSS tokens.
 Install the browser before the first end-to-end run with
 `npx playwright install chromium`. GitHub Actions runs the same checks using
 ephemeral credentials and the repository's Compose database; it does not

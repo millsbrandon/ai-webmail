@@ -1,6 +1,6 @@
 # Dependency and license inventory
 
-Review date: 7 October 2026. This inventory distinguishes installed direct dependencies from uninstalled
+Review date: 8 October 2026. This inventory distinguishes installed direct dependencies from uninstalled
 candidates. Package versions and SPDX license metadata were queried from the
 public npm registry on the review date. Recheck advisories, transitive licenses,
 engine requirements, and package provenance when dependencies change.
@@ -34,7 +34,7 @@ declares Apache-2.0.
 | SimpleWebAuthn server | 14.0.3 | MIT | Planned WebAuthn verifier; actual origin/RP ID remain unconfigured pending W04. |
 | `argon2` | 0.45.1 | MIT | Planned native Argon2id package; platform build and resource cost need W09 testing. |
 | `sanitize-html` | 2.18.0 | MIT | Planned server-side HTML sanitizer; sanitization policy still requires security tests. |
-| Lucide React | 1.52.0 | ISC | Planned icon library; pin after confirming current icon names. |
+| Lucide React | 1.53.0 | ISC | Installed in `apps/web` for the named SVG icon registry; published 8 October 2026, React 19 peer-compatible, and icon exports are checked by TypeScript. |
 | Biome | 2.5.15 | MIT OR Apache-2.0 | Installed foundation linter/formatter, replacing an ESLint config whose dependency chain included a high-severity braces advisory. |
 | Radix Dialog | 1.2.0 | MIT | Candidate accessible primitive; introduce only where needed. |
 
@@ -65,5 +65,7 @@ production web build, worker build and shutdown, local database migrations,
 runtime-role DML/DDL checks, production health endpoint, and a fresh repeatable
 Docker Compose start pass. W07 lint/typecheck/build, four unit tests, one
 isolated-PostgreSQL integration test, three Chromium end-to-end/accessibility
-tests, and full npm audit pass locally. GitHub Actions validation is pending
-the W07 review branch.
+tests, and full npm audit passed locally and in GitHub Actions on W07 commit
+`c2de68162987fe809600a4454fbdf55a24164170`. W08 is adding the pinned Lucide
+React runtime dependency; its final lockfile/audit evidence is recorded by the
+W08 checkpoint.
