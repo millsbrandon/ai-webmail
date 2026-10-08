@@ -4,12 +4,12 @@ Version 1.0 • 7 October 2026
 Companion: AI_WEBMAIL_DESIGN_PLAYBOOK.md. Product: standalone open-source codebase; NO OpenClaw runtime.
 
 ## Current truth
-Implementation completed: **5 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05, W06, W07, and W08 are done. G0 is exited for foundation work with W02–W04 explicitly blocked; G1 remains in progress pending its exit review before W09. AI, WhatsApp, and real mailbox integration stay disabled.
+Implementation completed: **5 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05, W06, W07, and W08 are done; W09 is the single active task. G0 is exited for foundation work with W02–W04 explicitly blocked. G1 is technically exited for G2 local implementation; G2 is active. Production authentication/provisioning and all external integrations remain disabled.
 
 Documentation deliverables: design playbook and this tracker authored; document checks are separate from implementation progress.
 
 ## Mandatory work protocol
-States: todo → in_progress → review → done; or blocked. Only one task in_progress. Dependencies follow listed order unless a recorded owner-approved decision explicitly allows independent work. Phase exit requires all mandatory tasks done and gate sign-off. Blocked tasks are not done; optional features can be deferred only by named scope decision, remain tracked, and must be disabled in release. Never cross a security/send gate just to keep busy.
+States: todo → in_progress → review → done; or blocked. Only one task in_progress. Dependencies follow listed order unless a recorded decision explicitly allows independent work. Operate autonomously: do not wait for routine owner check-ins, preference questions with a clear safe default, or ceremonial approval. The implementer may technically review and record a phase gate once all written criteria and evidence are satisfied. This does not replace approvals required for live customer data, external sends, paid services, production changes/deployment, or AI/WhatsApp enablement. Blocked tasks remain blocked; continue other permitted work. Optional features can be deferred only by named scope decision, remain tracked, and must be disabled in release. Never cross a security/send gate just to keep busy.
 
 Before task: confirm dependencies, owner, acceptance IDs, branch/commit and test plan. After: record changed files, test commands/results, evidence paths, risks, rollback and reviewer. No evidence means not done. Capture actual completion counts, not estimates. Update this file with each meaningful transition and keep a commit history.
 
@@ -28,7 +28,7 @@ Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate sig
 
 ## G1 — Repository and environment
 Entry: G0 baseline approved; unresolved integrations stay disabled.
-Gate status: IN PROGRESS. Reviewer/date: —
+Gate status: EXITED FOR G2 LOCAL IMPLEMENTATION ONLY. Technical reviewer/date: Copilot technical evidence review under D012, 8 October 2026. W05–W08 are done; W08 local checks and both GitHub Actions workflows passed on `d1c3976b32b31ee9e120778c3a4ca429705b3af3`. No production users, credentials, mailboxes, or external services are enabled by this transition.
 
 | ID | Task | Status | Required completion evidence | Acceptance |
 |---|---|---|---|---|
@@ -41,11 +41,11 @@ Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate sig
 
 ## G2 — Authentication and isolation
 Entry: G1 verified.
-Gate status: NOT STARTED. Reviewer/date: —
+Gate status: IN PROGRESS FOR LOCAL AUTH IMPLEMENTATION. Reviewer/date: autonomous task progression under D012; W09 only. Authentication remains unprovisioned outside local synthetic development.
 
 | ID | Task | Status | Required completion evidence | Acceptance |
 |---|---|---|---|---|
-| W09 | Implement invite-only users and password auth | todo | Hash/cooldown/session/CSRF tests; no enumeration | A03 |
+| W09 | Implement invite-only users and password auth | review | Hash/cooldown/session/CSRF tests; invitation expiry/replay; no enumeration | A03 |
 | W10 | Implement passkeys and recovery | todo | Real-device passkey evidence, challenge replay/origin tests, recovery drill | A03 |
 | W11 | Implement mailbox memberships and capability service | todo | Owner/A/B fixture passes direct API and object access tests | A01,A02 |
 | W12 | Implement session revocation and audit | todo | Immediate disabled-user rejection, privileged reauth, attributable events | A01,A07 |
@@ -175,6 +175,8 @@ D008: Codex documentation describes subscription-authenticated use in Codex prod
 D009: Shared provider Seen versus per-user unread — app keeps per-user read cursors.
 D010: SMTP ambiguity — delivery_unknown, no blind resend; do not promise exactly once.
 D011: Owner approved the repository baseline and requested implementation start. Proceed with repository/environment groundwork while AI, WhatsApp, live mailbox access, and deployment remain blocked pending their specific gates.
+D012: On 8 October 2026 the owner directed autonomous progress without waiting for routine owner sign-off. Continue local, reversible work and make documented technical phase reviews when evidence satisfies the written criteria. This does not waive live-data, external-send, paid-service, production/deployment, AI, WhatsApp, or other explicitly stated safety gates.
+D013: G1 technical exit authorizes local G2 implementation only; it does not enable production authentication or user invitations. W09 remains invite-only and synthetic in development. No public self-registration, live invitations, or deployment is in scope.
 
 ## W02/W03 independent feasibility research — 7 October 2026
 
@@ -250,14 +252,28 @@ Research was done from official public documentation while W01 remote setup was 
 ## W08 design tokens and component gallery checkpoint — 8 October 2026
 
 - Status: **done**. Owner: project implementation. Acceptance: A10.
-- Dependency/gate: W07 is complete on PR #4 after push and pull-request CI both passed on `c2de68162987fe809600a4454fbdf55a24164170`. G1 remains in progress; do not start G2 work until W08 evidence and the G1 gate are reviewed.
+- Dependency/gate: W07 and W08 are complete with passing local and CI evidence. G1 was technically reviewed and exited for local G2 implementation under D012; this does not authorize production authentication, live users, or external services.
 - Branch: `feat/W08-design-system`, based on verified W07 branch head `c2de68162987fe809600a4454fbdf55a24164170`; implementation commit `417e7552d210e99a8659359796596f095c30d055`; tracker evidence commit `39db9d6b87c3d9ab1d774598b07d50b3f315c551`. Stacked PR [#5](https://github.com/millsbrandon/ai-webmail/pull/5) targets W07 PR #4, is open and unmerged, and the branch remote SHA was verified. Do not merge earlier stacked PRs as a shortcut.
 - Changed: replaced page-level color literals with semantic theme, spacing, radius, and focus tokens; added a responsive `/design-system` page with light and dark component examples for default/hover/focus/selected/disabled/loading/error/empty/offline/permission-revoked/stale states; added a typed, named Lucide SVG icon registry pinned to 1.53.0; linked the gallery from the foundation landing page; added CSS-token contrast tests and [the W08 contrast report](./evidence/W08/2026-10-08/contrast-report.md); extended browser tests for gallery accessibility, keyboard focus, and target viewport widths; documented the gallery, updated the dependency/license inventory, and added the Lucide package/lock entry.
 - Validation: Node.js 24.21.0 and exact npm 11.16.0. `npm ci --ignore-scripts` passed with 0 vulnerabilities; `npm run lint` and `npm run typecheck` passed; `npm run test` passed (5 unit, 1 isolated-PostgreSQL integration, 5 Chromium end-to-end/accessibility tests); axe reported zero violations on the gallery and landing page; browser page-overflow checks passed at 320, 375, 390, 768, 1024, 1280, 1440, and 1920 CSS pixels; the unit contrast test verified 23 token pairs per theme (minimum text 6.20:1 light / 7.76:1 dark, control boundary 4.55:1 / 6.66:1, focus 6.41:1 / 9.47:1); `npm run build` and `npm run worker:build` passed; `npm audit` reported 0 vulnerabilities. The rendered gallery was visually reviewed. `git diff --check` passed and Gitleaks found no leaks in 18 reachable commits or staged changes. The local PostgreSQL service was stopped without deleting its named volume; port 5432 is free.
-- GitHub: push run [#37763722420](https://github.com/millsbrandon/ai-webmail/actions/runs/37763722420) and PR run [#37763727783](https://github.com/millsbrandon/ai-webmail/actions/runs/37763727783) both passed on tracker commit `39db9d6b87c3d9ab1d774598b07d50b3f315c551`; `gh pr view` and `git ls-remote` verified the open PR head and exact remote SHA. PR #5 remains unmerged. G1 phase exit/sign-off is still pending before W09.
+- GitHub: push run [#37763722420](https://github.com/millsbrandon/ai-webmail/actions/runs/37763722420) and PR run [#37763727783](https://github.com/millsbrandon/ai-webmail/actions/runs/37763727783) both passed on tracker commit `39db9d6b87c3d9ab1d774598b07d50b3f315c551`; `gh pr view` and `git ls-remote` verified the open PR head and exact remote SHA. PR #5 remains unmerged. G1 technical exit for local G2 work is recorded; deployed authentication remains disabled.
 - Privacy/cost: static synthetic examples only. No mailbox data, provider access, AI/WhatsApp service, paid dependency, or deployment.
 - Rollback: revert only W08 commits on its task branch; no database or external-service changes are planned.
-- Reviewer/gate: implementation, documentation, acceptance evidence, and CI are complete for W08. The PR remains open for owner review; G1 exit/sign-off is still required before W09 begins on its own branch. W02–W04 and all integration gates remain unchanged.
+- Reviewer/gate: implementation, documentation, acceptance evidence, and CI are complete for W08. PR #5 remains open and unmerged for ordinary GitHub review. G1 technical exit for local G2 implementation is recorded above; W02–W04 and all external integration gates remain unchanged.
+
+## W09 invite-only password authentication checkpoint — 8 October 2026
+
+- Status: **review**. Owner: project implementation. Acceptance: W09 password-auth scope under A03; passkeys/recovery continue in W10.
+- Dependency/gate: G1 technical evidence review is complete under D012 for local G2 implementation only. This does not authorize deployed authentication, live users/invitations, live mail, or any external integration. G2 remains active; W10–W12 are not started.
+- Branch: `feat/W09-password-auth`, based on verified W08 branch head `d1c3976b32b31ee9e120778c3a4ca429705b3af3`; local implementation SHA pending checkpoint.
+- Scope: invite-only account model, local invitation issuance/consumption for synthetic development, Argon2id password hashing, generic login failures, minimum-length/byte limits and a local common-password denylist, account cooldown, opaque server-side sessions, CSRF/origin protections, secure cookie behavior, and revocation/logout tests. Trusted-source rate limiting remains a pre-public-exposure hardening gate because the proxy trust boundary is not configured. No public signup or deployed invite dispatch.
+- Changed: auth tables and migration; Argon2id password policy and hashing; single-use, expiring invitations; generic login failures and account cooldown; opaque server sessions with idle/absolute expiry and revocation; exact-origin/CSRF checks, Secure `__Host-` cookies and bounded JSON bodies; login/invitation pages; local test-database migration command; synthetic integration and browser tests. CSRF bootstrap requests are deduplicated and reuse an existing valid cookie so React Strict Mode and repeated reads cannot desynchronize the double-submit value.
+- Validation: Node.js 24.21.0 and npm 11.16.0. `npm ci --ignore-scripts` passed with 0 vulnerabilities and the bundled Argon2 prebuild loaded; `npm run db:generate` reported no schema changes; `npm run db:migrate:test` applied migrations to `webmail_test` and succeeded when repeated; a negative-path check confirmed that the migration helper refuses the primary `webmail` database. The CI workflow YAML parsed. `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, `npm run worker:build`, and `npm audit` passed. `npm run test` passed 9 unit tests, 6 PostgreSQL integration tests, and 6 Chromium end-to-end/accessibility tests. axe reported zero violations on invitation and login pages. `git diff --cached --check` passed; `gitleaks git --no-banner --redact --log-opts='--all'` scanned 23 commits and `gitleaks protect --staged --no-banner --redact` found no leaks. Full staged source/schema/config/docs diff reviewed; commit, push, PR, and CI verification remain before done.
+- Limitations/gates: the denylist is a short local set of common phrases, not a comprehensive breached-password corpus. Source/IP rate limiting is not implemented because no trusted proxy address contract exists; add and verify that control before public exposure. Public invitation issuance/delivery, passkeys/recovery (W10), mailbox memberships (W11), and administrative revocation/audit (W12) are not implemented. Authentication is local synthetic-development only.
+- Privacy/cost: synthetic users and `webmail_test` only; no live staff list, production provisioning, external invitation delivery, mailbox, or paid service. Secrets stay in ignored local environment files.
+- Rollback: revert only W09 task-branch commits; do not remove database volumes or touch production services.
+- GitHub: local validation passed; secret scan and reviewed checkpoint pending; then push a stacked PR targeting `feat/W08-design-system` and verify remote SHA and checks.
+- Next permitted task: complete W09 evidence and review before W10. W02–W04 remain blocked; no deployment or live-user onboarding.
 
 ## Requirement traceability
 | Requirement | Primary tasks | Acceptance |

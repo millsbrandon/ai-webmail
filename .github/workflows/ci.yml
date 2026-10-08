@@ -64,7 +64,7 @@ jobs:
               ]),
               ".env": "DATABASE_URL="
               + connection("webmail_runtime", runtime_password, "webmail")
-              + "\n",
+              + "\nAPP_ORIGIN=http://127.0.0.1:3100\n",
           }
           for name, contents in files.items():
               path = Path(name)
@@ -79,25 +79,7 @@ jobs:
         run: npm run db:migrate
 
       - name: Apply migrations to isolated test database
-        run: |
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-          import subprocess
-
-          values = dict(
-              line.split("=", 1)
-              for line in Path(".env.migrations").read_text().splitlines()
-              if "=" in line
-          )
-          environment = os.environ.copy()
-          environment["DATABASE_MIGRATOR_URL"] = values["DATABASE_TEST_URL"]
-          subprocess.run(
-              ["npm", "run", "db:migrate", "--workspace=@ai-webmail/db"],
-              check=True,
-              env=environment,
-          )
-          PY
+        run: npm run db:migrate:test
 
       - name: Audit dependencies
         run: npm audit

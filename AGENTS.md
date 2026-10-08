@@ -10,6 +10,10 @@
    acceptance evidence, and a pushed checkpoint.
 4. Keep the tracker, requirements, and decision records consistent. Record
    blocked work honestly and do not bypass phase gates.
+5. Work autonomously: do not pause for routine progress approval, preference
+   questions with a clear safe default, or ceremonial owner sign-off. Review
+   phase evidence and record a technical gate decision when its written
+   criteria are met; continue to the next unblocked task.
 
 ## Product and safety boundaries
 
@@ -32,6 +36,11 @@
   authorization have been accepted.
 - Do not deploy, send customer mail, change DNS/MX, or alter the existing
   FreeScout/server services as a side effect of development.
+- Autonomy applies to local, reversible engineering and documented technical
+  reviews. It does not authorize live customer data access, external sends,
+  paid services, production changes/deployment, or enabling gated AI/WhatsApp.
+  Continue safe independent work when one of those separate approvals is
+  missing; do not claim the blocked action was approved.
 
 ## GitHub checkpoints
 

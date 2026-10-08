@@ -7,12 +7,14 @@
 		"build": "node ../../scripts/next.mjs build apps/web",
 		"start": "node ../../scripts/next.mjs start apps/web",
 		"typecheck": "tsc --noEmit",
-		"test:unit": "tsx --test app/api/health/route.unit.test.ts app/design-system/contrast.unit.test.ts",
-		"test:integration": "node --env-file-if-exists=../../.env --import tsx --test app/api/health/route.integration.test.ts",
+		"test:unit": "tsx --test app/api/health/route.unit.test.ts app/design-system/contrast.unit.test.ts lib/auth/auth.unit.test.ts",
+		"test:integration": "node --env-file-if-exists=../../.env --import tsx --test app/api/health/route.integration.test.ts app/api/auth/auth.integration.test.ts",
 		"test:e2e": "playwright test --config=playwright.config.mts"
 	},
 	"dependencies": {
 		"@ai-webmail/db": "*",
+		"argon2": "0.45.1",
+		"drizzle-orm": "0.45.3",
 		"lucide-react": "1.53.0",
 		"next": "16.4.0",
 		"react": "19.3.0",
