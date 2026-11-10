@@ -4,7 +4,7 @@ Version 1.0 • 7 October 2026
 Companion: AI_WEBMAIL_DESIGN_PLAYBOOK.md. Product: standalone open-source codebase; NO OpenClaw runtime.
 
 ## Current truth
-Implementation completed: **6 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05–W09 are done. G0 is exited for foundation work with W02–W04 explicitly blocked. G1 is technically exited for G2 local implementation; G2 is active on W10. Production authentication/provisioning and all external integrations remain disabled.
+Implementation completed: **6 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05–W09 are done. G0 is exited for foundation work with W02–W04 explicitly blocked. G1 is technically exited for G2 local implementation; W10 is blocked on device/recovery evidence and W11 is active independently under D014. Production authentication/provisioning and all external integrations remain disabled.
 
 Documentation deliverables: design playbook and this tracker authored; document checks are separate from implementation progress.
 
@@ -41,13 +41,13 @@ Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate sig
 
 ## G2 — Authentication and isolation
 Entry: G1 verified.
-Gate status: IN PROGRESS FOR LOCAL AUTH IMPLEMENTATION. Reviewer/date: autonomous task progression under D012; W09 complete and W10 active. Authentication remains unprovisioned outside local synthetic development.
+Gate status: IN PROGRESS FOR LOCAL AUTH AND ISOLATION IMPLEMENTATION. Reviewer/date: autonomous task progression under D012/D014, 10 November 2026; W09 complete, W10 blocked on physical-device/recovery evidence, W11 active independently. G2 has not exited. Authentication remains unprovisioned outside local synthetic development.
 
 | ID | Task | Status | Required completion evidence | Acceptance |
 |---|---|---|---|---|
 | W09 | Implement invite-only users and password auth | done | Hash/cooldown/session/CSRF tests; invitation expiry/replay; no enumeration | A03 |
-| W10 | Implement passkeys and recovery | in_progress | Real-device passkey evidence, challenge replay/origin tests, recovery drill | A03 |
-| W11 | Implement mailbox memberships and capability service | todo | Owner/A/B fixture passes direct API and object access tests | A01,A02 |
+| W10 | Implement passkeys and recovery | blocked | Real-device passkey evidence, challenge replay/origin tests, recovery drill | A03 |
+| W11 | Implement mailbox memberships and capability service | review | Owner/A/B fixture passes direct API and object access tests | A01,A02 |
 | W12 | Implement session revocation and audit | todo | Immediate disabled-user rejection, privileged reauth, attributable events | A01,A07 |
 
 Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate signature and release impact recorded before next phase.
@@ -177,6 +177,7 @@ D010: SMTP ambiguity — delivery_unknown, no blind resend; do not promise exact
 D011: Owner approved the repository baseline and requested implementation start. Proceed with repository/environment groundwork while AI, WhatsApp, live mailbox access, and deployment remain blocked pending their specific gates.
 D012: On 8 October 2026 the owner directed autonomous progress without waiting for routine owner sign-off. Continue local, reversible work and make documented technical phase reviews when evidence satisfies the written criteria. This does not waive live-data, external-send, paid-service, production/deployment, AI, WhatsApp, or other explicitly stated safety gates.
 D013: G1 technical exit authorizes local G2 implementation only; it does not enable production authentication or user invitations. W09 remains invite-only and synthetic in development. No public self-registration, live invitations, or deployment is in scope.
+D014: On 10 November 2026, following the owner's renewed direction to continue autonomous work, technical review permits W11 synthetic authorization implementation independently of W10's unavailable physical-device/recovery evidence. W10 is blocked, not complete; no device result is inferred. W11 depends on the verified W09 session contract, not physical authenticators. Only W11 is in progress. This supersedes the earlier W10 handoff's blanket sequencing restriction, not A03 or the G2 exit gate; real mailbox connections, production provisioning and all external safety gates remain blocked.
 
 ## W02/W03 independent feasibility research — 7 October 2026
 
@@ -277,7 +278,7 @@ Research was done from official public documentation while W01 remote setup was 
 
 ## W10 passkeys and recovery implementation checkpoint — 8 October 2026
 
-- Status: **in_progress**. Local implementation and synthetic verification are complete; W10 stays open because physical-device compatibility and a real recovery-destination drill have not been verified. Acceptance: A03.
+- Status: **blocked** as of 10 November 2026. Local implementation and synthetic verification are complete; W10 stays open because physical-device compatibility and a real recovery-destination drill have not been verified. Acceptance: A03.
 - Dependency/gate: stacked on the verified W09 branch head `5a9b502d2954a28bab7b878b7d716be9be34a43f`; G2 remains active. This work enables no live accounts, external invitation delivery, mailbox, production hostname, mail, or external integration.
 - Scope: session-bound passkey registration and removal, discoverable passkey login, one-use short-lived challenge enforcement, exact-origin/RP-ID and user-handle checks, authenticator counter protection, recent-authentication gating, one-time hashed recovery codes and recovery login, with password login retained as fallback. Private authentication GET routes are dynamic and `no-store`.
 - Changed: WebAuthn challenge/credential and recovery-code schema plus migration/backfill; server verification and route handlers; passkey/recovery UI and virtual-authenticator browser coverage; password-fallback and logout synchronization tests; local origin/device-test documentation, threat model, dependency inventory, and design-playbook acceptance notes.
@@ -286,7 +287,21 @@ Research was done from official public documentation while W01 remote setup was 
 - Privacy/cost: synthetic users and isolated test database only; no customer mail, production identity, credential, external service, paid service, or deployment used.
 - Rollback: revert only W10 task-branch commits; preserve local database volumes and do not touch production services.
 - GitHub checkpoint: commit `7d9a60de81e55e52b3e175b4fa7e356f8ac508ae` is pushed on `feat/W10-passkeys-recovery`; `git ls-remote` matched the exact SHA. Stacked PR [#7](https://github.com/millsbrandon/ai-webmail/pull/7) targets W09 PR #6 and is open/unmerged. Both push and PR CI runs passed ([37770625312](https://github.com/millsbrandon/ai-webmail/actions/runs/37770625312), [37770652185](https://github.com/millsbrandon/ai-webmail/actions/runs/37770652185)).
-- Checkpoint state: implementation, local checks, scans, remote SHA, and CI are verified. W10 remains in progress; W11 cannot start until the physical-device and recovery-preparation evidence is reviewed. Do not bypass W10's remaining gates.
+- Checkpoint state at 8 October: implementation, local checks, scans, remote SHA, and CI are verified. On 10 November W10 moved to blocked for physical-device/recovery-preparation evidence; D014 permits independent synthetic W11 work without claiming W10 or G2 complete.
+
+## W11 mailbox memberships and capabilities — 10 November 2026
+
+- Status: **review** pending pushed checkpoint/CI. Owner/reviewer: project implementation / Copilot technical evidence review. Acceptance: W11 synthetic A01/A02 isolation scope only; future mail/search/download/send surfaces remain separate tasks.
+- Branch: `feat/W11-mailbox-capabilities`, based on verified W10 checkpoint `552c5fc39512da3ddf496ea9c1d102f558892e7b` (PR #7 remains open/unmerged with passing CI).
+- Plan: organization and explicit mailbox memberships with composite tenant constraints; shared deny-by-default role/capability service; session-authenticated, scoped metadata list/detail routes; synthetic Owner/A/B, administrator-without-content, cross-organization and revoked/disabled-member tests.
+- Safety: no mailbox connection, credentials, content, invitation delivery, real identities, or deployment. W10's evidence remains blocked; G2 has not exited. An existing untracked duplicate login source is not part of this task and will not be staged or modified.
+- Changed: four organization/mailbox tables with role/status checks, uniqueness and composite tenant foreign keys; new `packages/domain` capability/scoped-query service; authenticated no-store metadata list/detail routes; role/flag unit tests, Owner/A/B service/handler integration tests, and an actual HTTP isolation/revocation test. No content permission bypass for organization owners or administrators; no public grant API before audited privileged operations.
+- Validation prerequisite: `npm audit` identified newly disclosed critical advisories in the existing Next.js 16.4.0 pin (GHSA-2464-fhr4-w9xw, GHSA-p3m5-59mp-jv5r, GHSA-673q-mjm6-r5xr). Updated only the exact Next.js patch pin to 16.4.6 and its locked packages; registry engines/peers remain compatible. No floating upgrade or install scripts used. This is necessary for the required audit/CI gate.
+- Local evidence: Node.js 24.21.0 / exact cached npm 11.16.0. `npm install --package-lock-only --ignore-scripts` and `npm ci --ignore-scripts` passed; `npm audit` reports 0 vulnerabilities. `npm run lint`, `npm run typecheck`, `npm run test:unit` (16 tests), `npm run test:integration` (14 tests), `npm run test:e2e` (10 tests), `npm run build`, and `npm run worker:build` passed. `npm run db:migrate` and `npm run db:migrate:test` passed on local-only databases; `npm run db:generate` reports no schema changes. The compiler initially encountered duplicate generated Next declaration caches; only eight named duplicate ignored cache files were removed, leaving the untracked login source untouched. All later typechecks/builds pass.
+- Migration review: the composite mailbox identity is a table-level UNIQUE constraint so it exists before membership foreign keys are added. Fresh W11 application and repeat generation succeeded; foreign-key tests require PostgreSQL 23503 and duplicate membership tests require 23505.
+- Checkpoint review: complete code/schema/lockfile/documentation diff reviewed; `git diff --cached --check` passed; `gitleaks git --no-banner --redact --log-opts='--all'` scanned 28 reachable commits with no leaks; `gitleaks protect --staged --no-banner --redact` found no leaks. The unrelated untracked login duplicate is excluded.
+- Limits: scoped metadata and policy only; no message objects, sending, streams, search, attachments, AI or membership administration UI is claimed complete. Future surfaces must apply the same tenant/mailbox/capability scope before fetching their own objects. Runtime grants are a service trust boundary, not database row-level security.
+- Rollback: revert W11 task commits and disable its read routes; preserve local volumes and do not remove shared database tables or production data as a shortcut.
 
 ## Requirement traceability
 | Requirement | Primary tasks | Acceptance |

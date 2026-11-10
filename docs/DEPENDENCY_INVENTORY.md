@@ -1,6 +1,6 @@
 # Dependency and license inventory
 
-Review date: 8 October 2026. This inventory distinguishes installed direct dependencies from uninstalled
+Review date: 10 November 2026. This inventory distinguishes installed direct dependencies from uninstalled
 candidates. Package versions and SPDX license metadata were queried from the
 public npm registry on the review date. Recheck advisories, transitive licenses,
 engine requirements, and package provenance when dependencies change.
@@ -13,10 +13,10 @@ declares Apache-2.0.
 | Component | Pinned version | Registry license | Status / notes |
 |---|---:|---|---|
 | TypeScript | 6.0.3 | Apache-2.0 | Installed root/workspace development tool. |
-| Next.js | 16.4.0 | MIT | Installed in `apps/web`; Node >=20.9 according to package metadata. |
+| Next.js | 16.4.6 | MIT | Exact patch update required by W11's audit gate; resolves GHSA-2464-fhr4-w9xw, GHSA-p3m5-59mp-jv5r and GHSA-673q-mjm6-r5xr reported against 16.4.0. Node >=20.9 and existing React 19 peer range remain compatible. |
 | React | 19.3.0 | MIT | Installed in `apps/web`. |
 | React DOM | 19.3.0 | MIT | Installed in `apps/web`. |
-| Drizzle ORM | 0.45.3 | Apache-2.0 | Installed database access layer in `packages/db` and direct W09 query support in `apps/web`; PostgreSQL migrations validated in W06/W09. |
+| Drizzle ORM | 0.45.3 | Apache-2.0 | Installed database access layer in `packages/db`, shared W11 scoped-query service in `packages/domain`, and web route tests; no new external package in W11. |
 | Drizzle Kit | 0.31.11 | MIT | Installed stable migration tool; nested esbuild is overridden to patched 0.25.12. CLI and migration behavior validated in W06. |
 | node-postgres (`pg`) | 8.23.1 | MIT | Installed PostgreSQL driver; local runtime and migration connections validated. |
 | `tsx` | 4.23.15 | MIT | Installed worker development runner. |

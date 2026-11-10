@@ -89,3 +89,23 @@ actual routes, jobs, schemas, and tests before any live mailbox is connected.
   rate limiting, owner recovery preparation, and production host provisioning
   remain release blockers. No verified personal recovery-address workflow is
   available, and authentication is not provisioned for live users.
+
+## W11 authorization implementation notes
+
+- Organization memberships and explicit mailbox memberships are separate.
+  Composite foreign keys reject membership links to mailboxes or users in
+  another organization. Organization owners and administrators do not bypass
+  mailbox membership; future setup must grant owner content access explicitly.
+- Shared domain queries scope by active user, organization, active mailbox,
+  membership and capability before selecting metadata. The list/detail HTTP
+  routes derive the actor from the opaque session, use no-store responses,
+  and disclose no credentials or other members. Inaccessible and nonexistent
+  mailbox IDs receive the same detail response.
+- Viewer write overrides are ineffective. Privileged contributor flags are
+  explicit, with manager approval/rules defaults and explicit deny overrides.
+  Authorization is reread on every request; revoked memberships have no cached
+  grace period.
+- This proves the metadata foundation only. Messages, search, counts,
+  attachments, streams, AI evidence, grants and sending require the same
+  scoped controls and their own tests as those features are implemented.
+  No public provisioning, owner auto-enrollment, or mail-content API is enabled.

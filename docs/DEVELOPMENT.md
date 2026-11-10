@@ -74,6 +74,11 @@ session-bound/replay-resistant WebAuthn challenges, recovery-code rotation and
 single-use sign-in, and browser passkey/recovery flows. The Chromium virtual
 authenticator is protocol-test evidence only, not evidence of physical
 iOS/macOS, Android, or Windows passkey support.
+W11 tests create synthetic organizations, mailboxes and explicit memberships.
+They verify the Owner/A/B matrix, no implicit owner/administrator content
+access, role/capability flags, tenant foreign keys, guessed IDs and immediate
+revocation through shared services and authenticated HTTP routes. No provider
+connection or actual mail object is needed.
 Install the browser before the first end-to-end run with
 `npx playwright install chromium`. GitHub Actions runs the same checks using
 ephemeral credentials and the repository's Compose database; it does not
@@ -88,8 +93,35 @@ all local development data.
 The application remains a local development foundation. W09/W10 provide
 invite-only password/passkey authentication and one-time recovery codes for
 synthetic users, but there is no public invitation issuance, production
-provisioning, verified personal recovery address, source/IP rate limiter, or
-mailbox membership/mail access. Do not use real user accounts. There are no
+provisioning, verified personal recovery address, or source/IP rate limiter.
+W11 adds unprovisioned organization/mailbox memberships and scoped metadata
+reads only. Do not use real user accounts. There are no
 mailbox credentials, mail content, synchronization jobs, send routes, or
 external integrations. The public landing page explicitly states that no
 mailbox is connected. Use synthetic data only.
+
+## Mailbox authorization foundation
+
+- `packages/domain` owns the shared mailbox capability/query service. Callers
+  supply the authenticated user ID and explicit organization scope, not a
+  client-asserted user ID. All queries require active users, active mailboxes,
+  organization membership, explicit mailbox membership and the requested
+  capability before returning rows. Results are not cached.
+- `GET /api/organizations/{organizationId}/mailboxes` lists only authorized
+  mailbox metadata and effective capabilities. The corresponding
+  `/{mailboxId}` route returns the same non-disclosing 404 for nonexistent,
+  inaccessible and malformed IDs. Both routes require an active session and
+  return `Cache-Control: no-store`; no provider configuration is returned.
+- Owners must have explicit mailbox membership, provisioned for every mailbox
+  during future audited setup. Neither owners nor administrators bypass
+  content permissions. There is intentionally no public grant/provisioning API
+  before W12's privileged reauthentication and audit controls.
+- Viewers only read, regardless of optional flags. Responders can compose,
+  send and collaborate; managers additionally manage templates. Managers
+  default to AI approval and rules management, with nullable `approve_ai` and
+  `manage_rules` overrides (`null` = role default, `false` = deny, `true` =
+  explicit grant for contributors). Export and delete always require explicit
+  flags. These capabilities are policy decisions, not enabled send/AI features.
+- Future object/search/download/stream/send services must reuse these
+  predicates with their mailbox-scoped queries; checking metadata access and
+  then fetching objects without tenant/mailbox scope is not sufficient.
