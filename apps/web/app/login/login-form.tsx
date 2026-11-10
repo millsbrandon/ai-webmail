@@ -72,6 +72,7 @@ export function LoginForm() {
 		if (!csrfToken || !user) {
 			throw new Error("The sign-in response was incomplete.");
 		}
+		clearCsrfTokenRequest();
 		setPassword("");
 		setRecoveryCode("");
 		setState({ status: "authenticated", csrfToken, user });
@@ -262,6 +263,9 @@ export function LoginForm() {
 			<div aria-live="polite" className="auth-success">
 				<p>Signed in as {state.user.displayName}.</p>
 				<p>Mailbox access has not been configured.</p>
+				<Link href="/mailbox-setup">
+					Preview synthetic mailbox setup (owners only)
+				</Link>
 				<SecurityPanel csrfToken={state.csrfToken} />
 				<SessionPanel csrfToken={state.csrfToken} />
 				<button

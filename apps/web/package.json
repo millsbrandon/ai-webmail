@@ -8,7 +8,7 @@
 		"start": "node ../../scripts/next.mjs start apps/web",
 		"typecheck": "tsc --noEmit",
 		"test:unit": "tsx --test app/api/health/route.unit.test.ts app/design-system/contrast.unit.test.ts lib/auth/auth.unit.test.ts lib/auth/passkeys.unit.test.ts lib/auth/sessions.unit.test.ts",
-		"test:integration": "node --env-file-if-exists=../../.env --import tsx --test app/api/health/route.integration.test.ts app/api/auth/auth.integration.test.ts app/api/auth/session-management.integration.test.ts app/api/organizations/mailboxes.integration.test.ts",
+		"test:integration": "node --env-file-if-exists=../../.env --import tsx --test app/api/health/route.integration.test.ts app/api/auth/auth.integration.test.ts app/api/auth/session-management.integration.test.ts app/api/organizations/mailboxes.integration.test.ts app/api/mailbox-setup/route.integration.test.ts",
 		"test:e2e": "playwright test --config=playwright.config.mts"
 	},
 	"dependencies": {
