@@ -20,6 +20,7 @@ declares Apache-2.0.
 | Drizzle Kit | 0.31.11 | MIT | Installed stable migration tool; nested esbuild is overridden to patched 0.25.12. CLI and migration behavior validated in W06. |
 | node-postgres (`pg`) | 8.23.1 | MIT | Installed PostgreSQL driver; local runtime and migration connections validated. |
 | `tsx` | 4.23.15 | MIT | Installed worker development runner. |
+| esbuild | 0.28.2 | MIT | W14 exact-pinned worker build tool (also present transitively through tsx); bundles first-party TypeScript with pg/Drizzle external. Node >=18, compatible with Node 24. Install scripts remain disabled. |
 | `@types/node` | 24.19.1 | MIT | Installed root Node.js type definitions. |
 | `@types/react` | 19.3.0 | MIT | Installed web type definitions. |
 | `@types/react-dom` | 19.3.0 | MIT | Installed web type definitions. |

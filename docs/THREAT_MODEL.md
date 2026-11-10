@@ -134,3 +134,21 @@ actual routes, jobs, schemas, and tests before any live mailbox is connected.
   guessed authentication method. Failed-attempt auditing, rate limiting,
   retention, provisioning and invalidating future queued user-authorized sends
   require their own controls before release.
+
+## W14 synthetic queue trust boundary
+
+- One durable recurring job per tenant/mailbox; composite foreign keys reject
+  mismatched identities. Claims skip disabled mailboxes and locked rows.
+- Random unexpired lease tokens fence completion/failure writes. Competing
+  consumers cannot own the same current claim; abandoned claims are retried
+  within a five-attempt budget and terminal failures remain recorded.
+- Only a fixed synthetic empty-poll kind is accepted. No arbitrary payload,
+  mail credentials, user-provided handler, AI request or network adapter is
+  wired. Fixed failure categories avoid storing secrets in error text.
+- Lease recovery is at-least-once execution, not exactly-once external effects.
+  Future provider handlers must be idempotent and add cancellation/renewal and
+  last-moment authorization checks. Queue fencing alone does not stop stale
+  external I/O, guarantee send safety, or grant service-principal mail access.
+- G2's remaining platform/recovery evidence and all live-mail/send gates remain
+  in force. This independent synthetic queue is not an authorization to connect
+  or synchronize a mailbox.

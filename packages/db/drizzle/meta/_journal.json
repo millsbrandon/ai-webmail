@@ -36,6 +36,13 @@
 			"when": 1794346171115,
 			"tag": "0004_eager_mandarin",
 			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1794349303480,
+			"tag": "0005_flaky_pretty_boy",
+			"breakpoints": true
 		}
 	]
 }
