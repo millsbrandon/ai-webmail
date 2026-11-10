@@ -1,4 +1,4 @@
-import { passkeys } from "@ai-webmail/db/schema";
+import { passkeys, users } from "@ai-webmail/db/schema";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
@@ -13,7 +13,11 @@ import {
 } from "../../../../../../lib/auth/passkeys";
 import { readBoundedJsonBody } from "../../../../../../lib/auth/request-body";
 import { setSessionCookies } from "../../../../../../lib/auth/session-cookies";
-import { createSession } from "../../../../../../lib/auth/sessions";
+import {
+	createSession,
+	InactiveUserError,
+	sessionDeviceLabel,
+} from "../../../../../../lib/auth/sessions";
 import { getDatabase } from "../../../../../../lib/database";
 
 export const runtime = "nodejs";
@@ -106,6 +110,14 @@ export async function POST(request: NextRequest) {
 		}
 
 		const authenticated = await db.transaction(async (transaction) => {
+			const [activeUser] = await transaction
+				.select({ id: users.id })
+				.from(users)
+				.where(and(eq(users.id, credential.userId), eq(users.status, "active")))
+				.for("update");
+			if (!activeUser) {
+				return undefined;
+			}
 			const [updated] = await transaction
 				.update(passkeys)
 				.set({
@@ -126,7 +138,15 @@ export async function POST(request: NextRequest) {
 				return undefined;
 			}
 
-			const session = await createSession(transaction, credential.userId);
+			const session = await createSession(
+				transaction,
+				credential.userId,
+				new Date(),
+				{
+					method: "passkey",
+					deviceLabel: sessionDeviceLabel(request.headers.get("user-agent")),
+				},
+			);
 			return { session };
 		});
 
@@ -150,6 +170,12 @@ export async function POST(request: NextRequest) {
 		);
 		return setSessionCookies(response, authenticated.session);
 	} catch (error) {
+		if (error instanceof InactiveUserError) {
+			return NextResponse.json(invalidCredentials, {
+				status: 401,
+				headers: { "Cache-Control": "no-store" },
+			});
+		}
 		console.error("Passkey authentication failed unexpectedly.", error);
 		return NextResponse.json(
 			{ error: "Passkey sign-in is temporarily unavailable." },

@@ -4,6 +4,7 @@ import {
 	boolean,
 	check,
 	foreignKey,
+	index,
 	integer,
 	jsonb,
 	pgSchema,
@@ -102,10 +103,23 @@ export const authSessions = app.table(
 		})
 			.notNull()
 			.defaultNow(),
+		authenticationMethod: text("authentication_method")
+			.$type<"password" | "passkey" | "recovery" | "unknown">()
+			.notNull()
+			.default("unknown"),
+		deviceLabel: text("device_label").notNull().default("Browser session"),
 		revokedAt: timestamp("revoked_at", { withTimezone: true }),
 	},
 	(table) => [
 		uniqueIndex("auth_sessions_token_hash_unique").on(table.tokenHash),
+		check(
+			"auth_sessions_method_valid",
+			sql`${table.authenticationMethod} IN ('password', 'passkey', 'recovery', 'unknown')`,
+		),
+		check(
+			"auth_sessions_device_label_bounded",
+			sql`char_length(${table.deviceLabel}) BETWEEN 1 AND 80`,
+		),
 	],
 );
 
@@ -289,5 +303,47 @@ export const mailboxMemberships = app.table(
 			"mailbox_memberships_role_valid",
 			sql`${table.role} IN ('viewer', 'responder', 'manager')`,
 		),
+	],
+);
+
+export const auditEvents = app.table(
+	"audit_events",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		actorUserId: uuid("actor_user_id").notNull(),
+		actorSessionId: uuid("actor_session_id"),
+		organizationId: uuid("organization_id"),
+		action: text("action")
+			.$type<
+				| "session.created"
+				| "session.revoked"
+				| "sessions.revoked_others"
+				| "user.disabled"
+				| "passkey.registered"
+				| "passkey.removed"
+				| "recovery.rotated"
+			>()
+			.notNull(),
+		targetId: text("target_id").notNull(),
+		outcome: text("outcome").$type<"success">().notNull().default("success"),
+		correlationId: uuid("correlation_id").defaultRandom().notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		index("audit_events_actor_created_idx").on(
+			table.actorUserId,
+			table.createdAt,
+		),
+		check(
+			"audit_events_action_valid",
+			sql`${table.action} IN ('session.created', 'session.revoked', 'sessions.revoked_others', 'user.disabled', 'passkey.registered', 'passkey.removed', 'recovery.rotated')`,
+		),
+		check(
+			"audit_events_target_bounded",
+			sql`char_length(${table.targetId}) BETWEEN 1 AND 2048`,
+		),
+		check("audit_events_outcome_valid", sql`${table.outcome} = 'success'`),
 	],
 );

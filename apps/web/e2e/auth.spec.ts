@@ -72,7 +72,7 @@ test("invitation, generic login failures, session, and logout work in the browse
 		await expect(
 			page.getByText("Signed in as Synthetic E2E User."),
 		).toBeVisible();
-		await page.getByRole("button", { name: "Sign out" }).click();
+		await page.getByRole("button", { name: "Sign out", exact: true }).click();
 		await expect(
 			page.getByRole("button", { name: "Sign in with a passkey" }),
 		).toBeEnabled();

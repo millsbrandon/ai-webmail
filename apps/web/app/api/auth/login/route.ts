@@ -3,6 +3,7 @@ import { hasValidCsrf, hasValidOrigin } from "../../../../lib/auth/csrf";
 import { authenticate } from "../../../../lib/auth/login";
 import { readBoundedJsonBody } from "../../../../lib/auth/request-body";
 import { setSessionCookies } from "../../../../lib/auth/session-cookies";
+import { sessionDeviceLabel } from "../../../../lib/auth/sessions";
 import { getDatabase } from "../../../../lib/database";
 
 export const runtime = "nodejs";
@@ -43,6 +44,8 @@ export async function POST(request: NextRequest) {
 			getDatabase().db,
 			credentials.email,
 			credentials.password,
+			new Date(),
+			sessionDeviceLabel(request.headers.get("user-agent")),
 		);
 
 		if (!result) {

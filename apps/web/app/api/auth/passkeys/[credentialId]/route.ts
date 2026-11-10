@@ -1,6 +1,7 @@
 import { passkeys } from "@ai-webmail/db/schema";
 import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
+import { writeAuditEvent } from "../../../../../lib/auth/audit";
 import {
 	cookieValue,
 	hasValidCsrf,
@@ -8,6 +9,10 @@ import {
 	sessionCookieName,
 } from "../../../../../lib/auth/csrf";
 import { isRecentAuthentication } from "../../../../../lib/auth/passkeys";
+import {
+	requireRecentSession,
+	SessionManagementError,
+} from "../../../../../lib/auth/session-management";
 import { getActiveSession } from "../../../../../lib/auth/sessions";
 import { getDatabase } from "../../../../../lib/database";
 
@@ -64,15 +69,27 @@ export async function DELETE(
 			);
 		}
 
-		const [removed] = await db
-			.delete(passkeys)
-			.where(
-				and(
-					eq(passkeys.credentialId, credentialId),
-					eq(passkeys.userId, session.userId),
-				),
-			)
-			.returning({ credentialId: passkeys.credentialId });
+		const removed = await db.transaction(async (transaction) => {
+			const current = await requireRecentSession(transaction, sessionToken);
+			const [credential] = await transaction
+				.delete(passkeys)
+				.where(
+					and(
+						eq(passkeys.credentialId, credentialId),
+						eq(passkeys.userId, current.userId),
+					),
+				)
+				.returning({ credentialId: passkeys.credentialId });
+			if (credential) {
+				await writeAuditEvent(transaction, {
+					actorUserId: current.userId,
+					actorSessionId: current.id,
+					action: "passkey.removed",
+					targetId: credential.credentialId,
+				});
+			}
+			return credential;
+		});
 		if (!removed) {
 			return NextResponse.json(
 				{ error: "Passkey was not found." },
@@ -85,6 +102,12 @@ export async function DELETE(
 			{ headers: { "Cache-Control": "no-store" } },
 		);
 	} catch (error) {
+		if (error instanceof SessionManagementError) {
+			return NextResponse.json(
+				{ error: error.message },
+				{ status: error.status, headers: { "Cache-Control": "no-store" } },
+			);
+		}
 		console.error("Passkey removal failed unexpectedly.", error);
 		return NextResponse.json(
 			{ error: "Passkey removal is temporarily unavailable." },

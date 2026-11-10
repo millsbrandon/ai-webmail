@@ -8,7 +8,7 @@ import {
 	verifyPassword,
 	verifyUnknownAccountPassword,
 } from "./password";
-import { createSession } from "./sessions";
+import { createSession, InactiveUserError } from "./sessions";
 
 const attemptWindowMs = 15 * 60 * 1000;
 const attemptLimit = 5;
@@ -23,6 +23,7 @@ export async function authenticate(
 	emailInput: string,
 	password: string,
 	now = new Date(),
+	deviceLabel?: string,
 ) {
 	const email = normalizeEmail(emailInput);
 	const key = accountKey(email);
@@ -58,7 +59,15 @@ export async function authenticate(
 	}
 
 	await db.delete(loginAttempts).where(eq(loginAttempts.accountHash, key));
-	const session = await createSession(db, user.id, now);
+	let session: Awaited<ReturnType<typeof createSession>>;
+	try {
+		session = await createSession(db, user.id, now, { deviceLabel });
+	} catch (error) {
+		if (error instanceof InactiveUserError) {
+			return undefined;
+		}
+		throw error;
+	}
 
 	return {
 		user: { id: user.id, email: user.email, displayName: user.displayName },

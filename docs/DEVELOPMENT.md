@@ -114,8 +114,8 @@ mailbox is connected. Use synthetic data only.
   return `Cache-Control: no-store`; no provider configuration is returned.
 - Owners must have explicit mailbox membership, provisioned for every mailbox
   during future audited setup. Neither owners nor administrators bypass
-  content permissions. There is intentionally no public grant/provisioning API
-  before W12's privileged reauthentication and audit controls.
+  content permissions. No grant/provisioning API is implemented; any future
+  such API must apply W12's privileged reauthentication and audit controls.
 - Viewers only read, regardless of optional flags. Responders can compose,
   send and collaborate; managers additionally manage templates. Managers
   default to AI approval and rules management, with nullable `approve_ai` and
@@ -125,3 +125,41 @@ mailbox is connected. Use synthetic data only.
 - Future object/search/download/stream/send services must reuse these
   predicates with their mailbox-scoped queries; checking metadata access and
   then fetching objects without tenant/mailbox scope is not sufficient.
+
+## Session revocation and audit
+
+The authenticated login/security screen lists active sessions with approximate
+browser/platform labels, sign-in method and timestamps. Only a fixed
+classification is stored, not raw user-agent strings or IP addresses. Sessions
+from before W12 are labelled `unknown` method rather than fabricating history.
+
+- `GET /api/auth/sessions` returns only the current user's live sessions and
+  never tokens/hashes. `DELETE /api/auth/sessions/{sessionId}` revokes an owned
+  session; `DELETE /api/auth/sessions` revokes all other sessions. Both
+  mutations require exact origin, session-bound CSRF and authentication within
+  five minutes. Ordinary sign-out remains possible without recent reauthentication.
+- `POST /api/organizations/{organizationId}/users/{userId}/disable` is
+  owner-only, session-CSRF/origin protected and recent-auth gated. It rejects
+  self/owner accounts and accounts belonging to multiple organizations, so an
+  owner cannot disable another organization's users or remove the last owner.
+  There is no general administrator bypass or account-enable endpoint.
+- Disabling a user revokes every session. Session creation and disabling lock
+  the same user row, preventing a concurrent login from escaping revocation.
+  Recovery-code sign-in also revokes all older sessions. Credential changes
+  recheck the active/recent session inside the mutation transaction.
+- Successful session creation/revocation, account disable, passkey
+  registration/removal and recovery-code rotation append an `app.audit_events`
+  record in the same transaction. Records contain actor/actor-session IDs,
+  optional organization, action, target, success outcome, timestamp and a
+  server-generated correlation ID; no passwords, tokens/hashes, mail content
+  or free-form metadata are stored.
+- Audit actor/target IDs deliberately have no cascading foreign keys, so
+  deleting an account/session cannot erase its attribution. Runtime-role
+  UPDATE/DELETE/TRUNCATE on this table are revoked by the W12 migration.
+  This is append-only for that role, not tamper-proof against database/server
+  administrators or a compromised runtime that can append misleading rows.
+  No public audit-export endpoint is implemented.
+- Tests use only synthetic identities. Audit records intentionally survive
+  test-user cleanup; use an isolated test database, never a live database.
+  Failed-request auditing, retention policy, user provisioning, password-change
+  UI, owner recovery and queued-send invalidation remain later release work.

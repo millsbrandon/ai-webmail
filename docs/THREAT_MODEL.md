@@ -109,3 +109,28 @@ actual routes, jobs, schemas, and tests before any live mailbox is connected.
   attachments, streams, AI evidence, grants and sending require the same
   scoped controls and their own tests as those features are implemented.
   No public provisioning, owner auto-enrollment, or mail-content API is enabled.
+
+## W12 revocation and audit implementation notes
+
+- Session lists are private/no-store and scoped to the current user. Revoking
+  another user's session returns a non-disclosing 404. Revocation/account
+  disable require exact origin, session-bound CSRF and five-minute freshness;
+  the active session is rechecked in the transaction before sensitive writes.
+- Account disabling is owner-only and restricted to non-owner users belonging
+  solely to that organization. Self/owner and multi-organization disables are
+  rejected. The user row serializes new-session issuance and disable;
+  every existing session is revoked before disable commits.
+- Successful recovery-code sign-in consumes the code, revokes prior sessions
+  and creates/audits its replacement transactionally. Passkey and recovery-code
+  mutations also write successful audit events and recheck session freshness
+  at commit-side mutation time.
+- Audit attribution uses immutable actor/actor-session IDs, action, target,
+  success outcome, timestamp, optional organization and correlation ID.
+  It does not retain raw user agents, IPs, secrets, mail, or arbitrary request
+  bodies. No cascading identity foreign keys erase historical attribution.
+  Runtime UPDATE/DELETE/TRUNCATE grants are revoked; administrator compromise
+  and malicious runtime inserts are not claimed solved.
+- No sessions from before W12 are retroactively attributed or assigned a
+  guessed authentication method. Failed-attempt auditing, rate limiting,
+  retention, provisioning and invalidating future queued user-authorized sends
+  require their own controls before release.

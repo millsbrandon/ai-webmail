@@ -1,6 +1,7 @@
-import { recoveryCodes, users } from "@ai-webmail/db/schema";
+import { authSessions, recoveryCodes, users } from "@ai-webmail/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
+import { writeAuditEvent } from "../../../../../lib/auth/audit";
 import {
 	hashToken,
 	hasValidCsrf,
@@ -8,7 +9,11 @@ import {
 } from "../../../../../lib/auth/csrf";
 import { readBoundedJsonBody } from "../../../../../lib/auth/request-body";
 import { setSessionCookies } from "../../../../../lib/auth/session-cookies";
-import { createSession } from "../../../../../lib/auth/sessions";
+import {
+	createSession,
+	InactiveUserError,
+	sessionDeviceLabel,
+} from "../../../../../lib/auth/sessions";
 import { getDatabase } from "../../../../../lib/database";
 
 export const runtime = "nodejs";
@@ -89,7 +94,22 @@ export async function POST(request: NextRequest) {
 				return undefined;
 			}
 
-			const session = await createSession(transaction, user.id);
+			await transaction
+				.update(authSessions)
+				.set({ revokedAt: new Date() })
+				.where(
+					and(eq(authSessions.userId, user.id), isNull(authSessions.revokedAt)),
+				);
+			const session = await createSession(transaction, user.id, new Date(), {
+				method: "recovery",
+				deviceLabel: sessionDeviceLabel(request.headers.get("user-agent")),
+			});
+			await writeAuditEvent(transaction, {
+				actorUserId: user.id,
+				actorSessionId: session.id,
+				action: "sessions.revoked_others",
+				targetId: user.id,
+			});
 			return {
 				session,
 				user: { email: user.email, displayName: user.displayName },
@@ -113,6 +133,12 @@ export async function POST(request: NextRequest) {
 		);
 		return setSessionCookies(response, result.session);
 	} catch (error) {
+		if (error instanceof InactiveUserError) {
+			return NextResponse.json(invalidCode, {
+				status: 401,
+				headers: { "Cache-Control": "no-store" },
+			});
+		}
 		console.error("Recovery code authentication failed unexpectedly.", error);
 		return NextResponse.json(
 			{ error: "Recovery sign-in is temporarily unavailable." },

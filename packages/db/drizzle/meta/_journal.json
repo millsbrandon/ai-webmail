@@ -29,6 +29,13 @@
 			"when": 1794345464286,
 			"tag": "0003_regular_jamie_braddock",
 			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1794346171115,
+			"tag": "0004_eager_mandarin",
+			"breakpoints": true
 		}
 	]
 }
