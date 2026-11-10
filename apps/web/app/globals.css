@@ -713,10 +713,33 @@ input:focus-visible {
 	overflow-wrap: anywhere;
 }
 
-.auth-security .button {
+.auth-security .button,
+.setup-wizard .button {
 	max-width: 100%;
 	overflow-wrap: anywhere;
 	white-space: normal;
+}
+
+.setup-wizard {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.setup-wizard select,
+.setup-wizard input {
+	width: 100%;
+	min-width: 0;
+	min-height: 44px;
+	border: 1px solid var(--border-control);
+	border-radius: var(--radius-control);
+	background: var(--surface);
+	color: var(--text);
+	padding: var(--space-2);
+	font: inherit;
+}
+
+.setup-wizard dd {
+	margin-left: var(--space-4);
 }
 
 @media (max-width: 540px) {

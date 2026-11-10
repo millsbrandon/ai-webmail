@@ -152,3 +152,21 @@ actual routes, jobs, schemas, and tests before any live mailbox is connected.
 - G2's remaining platform/recovery evidence and all live-mail/send gates remain
   in force. This independent synthetic queue is not an authorization to connect
   or synchronize a mailbox.
+
+## W13 disconnected setup preview
+
+- The authenticated catalog discloses only owned organizations; preview checks
+  recent active authentication, origin, session-bound CSRF and locked owner
+  membership. Administrators/members have no owner bypass. Preview results do
+  not grant mailbox content access, membership or provisioning rights.
+- Request bodies are bounded to 8192 bytes and structurally validated. Only
+  `.test` addresses and fixed synthetic selectable folders are accepted.
+  Duplicate/unknown/nonselectable mappings and unknown settings are rejected.
+  Error messages do not echo submitted credentials or provider settings.
+- No provider endpoint/credential is accepted, resolved, contacted or stored.
+  No TLS verification, live folder discovery, encrypted credential storage or
+  SSRF-safe provider transport is claimed implemented by this preview.
+- The result explicitly identifies its synthetic, unverified, unsaved and
+  sending-disabled state. This is not a success-shaped provider-connection
+  fallback. Real connection/provisioning routes must meet W13/G2 requirements
+  independently before enablement.

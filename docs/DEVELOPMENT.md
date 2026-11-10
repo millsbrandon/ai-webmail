@@ -207,3 +207,39 @@ restart/shutdown.
 workspace modules with exact-pinned esbuild; `pg`/Drizzle stay external installed
 dependencies. `npm run worker:start` runs the emitted JavaScript with no
 TypeScript runtime loader.
+
+## Disconnected mailbox setup preview
+
+After signing in, use **Preview synthetic mailbox setup (owners only)** or
+visit `/mailbox-setup`. The three steps cover metadata/history, folder mapping
+and review. The catalog is available only to authenticated users and lists only
+organizations where the user is an owner. There is no implicit administrator
+or mailbox-manager provisioning permission.
+
+`GET /api/mailbox-setup` returns that owned-organization catalog and clearly
+labelled synthetic folders. `POST /api/mailbox-setup` validates a preview for an
+owned organization, requiring exact origin, session CSRF and authentication
+within five minutes. It rechecks active session/ownership transactionally.
+Responses are private/no-store. Invalid or inaccessible organization IDs use the
+same non-disclosing error; users without owned organizations see an explanation,
+not an automatically created organization.
+
+The preview accepts only mailbox name, a `.test` address, one of the bounded
+history windows (new messages only, 30/90/365 days), and five folder roles.
+Folder suggestions use unique selectable special-use flags (INBOX is the
+protocol-defined name), not English name heuristics. All roles require distinct,
+selectable paths from the supplied fixture catalog; ambiguous/missing folders
+must be resolved explicitly. Paths preserve provider case. Unknown settings,
+credentials and arbitrary provider hosts are rejected without echoing values.
+
+The result explicitly reports `providerVerified: false`, `persisted: false`
+and `sendingEnabled: false`. There is no save/connect/send action, credential
+field, DNS resolution, provider adapter or job enqueue. This is W13 preparation,
+not a completed connection wizard or proof of TLS/provider compatibility.
+Real provider integration remains blocked on the recorded G2/W13 gates.
+
+The browser regression signs in normally, follows the setup link, corrects a
+duplicate folder, reviews and edits the preview, checks accessibility and all
+three steps at eight viewport widths, and asserts no external browser requests.
+Sign-in clears the cached pre-authentication CSRF request after rotating the
+session token so subsequent client navigation obtains the current token.
