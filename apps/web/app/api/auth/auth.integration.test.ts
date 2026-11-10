@@ -658,6 +658,16 @@ test("recovery codes are stored hashed, rotate atomically, and only sign in once
 	);
 	assert.equal(signIn.status, 200);
 	assert.equal(signIn.cookies.get(sessionCookieName)?.value.length, 43);
+	assert.equal(
+		await getActiveSession(database.db, authentication.session.sessionToken),
+		undefined,
+	);
+	assert.ok(
+		await getActiveSession(
+			database.db,
+			signIn.cookies.get(sessionCookieName)?.value ?? "",
+		),
+	);
 	assert.deepEqual((await signIn.json()).user, {
 		email,
 		displayName: "Recovery Test User",

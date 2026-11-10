@@ -128,7 +128,7 @@ test("virtual WebAuthn exercises passkey registration, sign-in, removal, and rec
 		});
 		expect(credentials.credentials).toHaveLength(1);
 
-		await page.getByRole("button", { name: "Sign out" }).click();
+		await page.getByRole("button", { name: "Sign out", exact: true }).click();
 		const authenticationOptionsResponse = page.waitForResponse((response) =>
 			response.url().endsWith("/api/auth/passkeys/authentication/options"),
 		);
@@ -164,7 +164,7 @@ test("virtual WebAuthn exercises passkey registration, sign-in, removal, and rec
 		).trim();
 		expect(recoveryCode).toMatch(/^[a-f0-9]{32}$/);
 
-		await page.getByRole("button", { name: "Sign out" }).click();
+		await page.getByRole("button", { name: "Sign out", exact: true }).click();
 		await page.getByRole("button", { name: "Use a recovery code" }).click();
 		await page.getByLabel("One-time recovery code").fill(recoveryCode);
 		await page
@@ -181,7 +181,7 @@ test("virtual WebAuthn exercises passkey registration, sign-in, removal, and rec
 			page.getByText("No passkeys are registered.", { exact: true }),
 		).toBeVisible();
 
-		await page.getByRole("button", { name: "Sign out" }).click();
+		await page.getByRole("button", { name: "Sign out", exact: true }).click();
 		await page.getByLabel("One-time recovery code").fill(recoveryCode);
 		await page
 			.getByRole("button", { name: "Sign in with recovery code" })

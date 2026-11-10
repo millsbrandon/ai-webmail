@@ -1,6 +1,7 @@
 import { passkeys } from "@ai-webmail/db/schema";
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
 import { type NextRequest, NextResponse } from "next/server";
+import { writeAuditEvent } from "../../../../../../lib/auth/audit";
 import {
 	cookieValue,
 	hasValidCsrf,
@@ -15,6 +16,10 @@ import {
 	isRegistrationResponse,
 } from "../../../../../../lib/auth/passkeys";
 import { readBoundedJsonBody } from "../../../../../../lib/auth/request-body";
+import {
+	requireRecentSession,
+	SessionManagementError,
+} from "../../../../../../lib/auth/session-management";
 import { getActiveSession } from "../../../../../../lib/auth/sessions";
 import { getDatabase } from "../../../../../../lib/database";
 
@@ -124,17 +129,27 @@ export async function POST(request: NextRequest) {
 			});
 		}
 
-		await db.insert(passkeys).values({
-			credentialId: registrationInfo.credential.id,
-			userId: session.userId,
-			publicKey: Buffer.from(registrationInfo.credential.publicKey).toString(
-				"base64url",
-			),
-			counter: registrationInfo.credential.counter,
-			transports: registrationInfo.credential.transports ?? [],
-			deviceType: registrationInfo.credentialDeviceType,
-			backedUp: registrationInfo.credentialBackedUp,
-			name: parsed.value.name.trim(),
+		const name = parsed.value.name.trim();
+		await db.transaction(async (transaction) => {
+			const current = await requireRecentSession(transaction, sessionToken);
+			await transaction.insert(passkeys).values({
+				credentialId: registrationInfo.credential.id,
+				userId: current.userId,
+				publicKey: Buffer.from(registrationInfo.credential.publicKey).toString(
+					"base64url",
+				),
+				counter: registrationInfo.credential.counter,
+				transports: registrationInfo.credential.transports ?? [],
+				deviceType: registrationInfo.credentialDeviceType,
+				backedUp: registrationInfo.credentialBackedUp,
+				name,
+			});
+			await writeAuditEvent(transaction, {
+				actorUserId: current.userId,
+				actorSessionId: current.id,
+				action: "passkey.registered",
+				targetId: registrationInfo.credential.id,
+			});
 		});
 
 		return NextResponse.json(
@@ -142,6 +157,12 @@ export async function POST(request: NextRequest) {
 			{ headers: { "Cache-Control": "no-store" } },
 		);
 	} catch (error) {
+		if (error instanceof SessionManagementError) {
+			return NextResponse.json(
+				{ error: error.message },
+				{ status: error.status, headers: { "Cache-Control": "no-store" } },
+			);
+		}
 		console.error(
 			"Passkey registration verification failed unexpectedly.",
 			error,

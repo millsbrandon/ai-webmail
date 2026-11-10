@@ -8,6 +8,7 @@ import {
 	requestCsrfToken,
 } from "../../lib/auth/csrf-client";
 import { SecurityPanel } from "./security-panel";
+import { SessionPanel } from "./session-panel";
 
 type AuthenticatedUser = { email: string; displayName: string };
 type FormState =
@@ -262,6 +263,7 @@ export function LoginForm() {
 				<p>Signed in as {state.user.displayName}.</p>
 				<p>Mailbox access has not been configured.</p>
 				<SecurityPanel csrfToken={state.csrfToken} />
+				<SessionPanel csrfToken={state.csrfToken} />
 				<button
 					className="button button-secondary"
 					onClick={signOut}

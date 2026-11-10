@@ -7,6 +7,10 @@ import {
 } from "../../../../lib/auth/csrf";
 import { isRecentAuthentication } from "../../../../lib/auth/passkeys";
 import { replaceRecoveryCodes } from "../../../../lib/auth/recovery-codes";
+import {
+	requireRecentSession,
+	SessionManagementError,
+} from "../../../../lib/auth/session-management";
 import { getActiveSession } from "../../../../lib/auth/sessions";
 import { getDatabase } from "../../../../lib/database";
 
@@ -50,12 +54,26 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		const codes = await replaceRecoveryCodes(db, session.userId);
+		const codes = await db.transaction(async (transaction) => {
+			const current = await requireRecentSession(transaction, sessionToken);
+			return replaceRecoveryCodes(
+				transaction,
+				current.userId,
+				new Date(),
+				current.id,
+			);
+		});
 		return NextResponse.json(
 			{ status: "recovery_codes_created", codes },
 			{ headers: { "Cache-Control": "no-store" } },
 		);
 	} catch (error) {
+		if (error instanceof SessionManagementError) {
+			return NextResponse.json(
+				{ error: error.message },
+				{ status: error.status, headers: { "Cache-Control": "no-store" } },
+			);
+		}
 		console.error("Recovery code rotation failed unexpectedly.", error);
 		return NextResponse.json(
 			{ error: "Recovery codes are temporarily unavailable." },
