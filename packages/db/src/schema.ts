@@ -3,11 +3,14 @@ import {
 	bigint,
 	boolean,
 	check,
+	foreignKey,
 	integer,
 	jsonb,
 	pgSchema,
+	primaryKey,
 	text,
 	timestamp,
+	unique,
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
@@ -187,3 +190,104 @@ export const loginAttempts = app.table("login_attempts", {
 		.notNull()
 		.defaultNow(),
 });
+
+export const organizations = app.table("organizations", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	name: text("name").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export const organizationMemberships = app.table(
+	"organization_memberships",
+	{
+		organizationId: uuid("organization_id")
+			.notNull()
+			.references(() => organizations.id, { onDelete: "cascade" }),
+		userId: uuid("user_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		role: text("role").$type<"owner" | "administrator" | "member">().notNull(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.organizationId, table.userId] }),
+		check(
+			"organization_memberships_role_valid",
+			sql`${table.role} IN ('owner', 'administrator', 'member')`,
+		),
+	],
+);
+
+export const mailboxes = app.table(
+	"mailboxes",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		organizationId: uuid("organization_id")
+			.notNull()
+			.references(() => organizations.id, { onDelete: "cascade" }),
+		displayName: text("display_name").notNull(),
+		address: text("address").notNull(),
+		status: text("status")
+			.$type<"active" | "disabled">()
+			.notNull()
+			.default("active"),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		unique("mailboxes_organization_id_unique").on(
+			table.organizationId,
+			table.id,
+		),
+		uniqueIndex("mailboxes_organization_address_unique").on(
+			table.organizationId,
+			table.address,
+		),
+		check(
+			"mailboxes_address_normalized",
+			sql`${table.address} = lower(btrim(${table.address}))`,
+		),
+		check(
+			"mailboxes_status_valid",
+			sql`${table.status} IN ('active', 'disabled')`,
+		),
+	],
+);
+
+export const mailboxMemberships = app.table(
+	"mailbox_memberships",
+	{
+		organizationId: uuid("organization_id").notNull(),
+		mailboxId: uuid("mailbox_id").notNull(),
+		userId: uuid("user_id").notNull(),
+		role: text("role").$type<"viewer" | "responder" | "manager">().notNull(),
+		approveAi: boolean("approve_ai"),
+		export: boolean("export").notNull().default(false),
+		delete: boolean("delete").notNull().default(false),
+		manageRules: boolean("manage_rules"),
+	},
+	(table) => [
+		primaryKey({
+			columns: [table.organizationId, table.mailboxId, table.userId],
+		}),
+		foreignKey({
+			columns: [table.organizationId, table.mailboxId],
+			foreignColumns: [mailboxes.organizationId, mailboxes.id],
+			name: "mailbox_memberships_mailbox_fk",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.organizationId, table.userId],
+			foreignColumns: [
+				organizationMemberships.organizationId,
+				organizationMemberships.userId,
+			],
+			name: "mailbox_memberships_organization_member_fk",
+		}).onDelete("cascade"),
+		check(
+			"mailbox_memberships_role_valid",
+			sql`${table.role} IN ('viewer', 'responder', 'manager')`,
+		),
+	],
+);
