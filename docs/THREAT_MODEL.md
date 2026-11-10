@@ -170,3 +170,24 @@ actual routes, jobs, schemas, and tests before any live mailbox is connected.
   sending-disabled state. This is not a success-shaped provider-connection
   fallback. Real connection/provisioning routes must meet W13/G2 requirements
   independently before enablement.
+
+## Fixture reconciliation boundary (D019)
+
+- The W15 planner accepts decoded synthetic metadata and returns a proposed
+  local delta. It is not reachable through web routes or the worker, performs
+  no I/O and grants no capabilities. Matching organization/mailbox IDs prevent
+  accidental snapshot mixing, but are not authentication or authorization.
+  Future consumers must obtain scope from the existing authorized mailbox/job
+  boundary rather than trust client-selected IDs.
+- Complete inventories are required before proposing expunged local references
+  or UIDNEXT advancement. Missing folders are retained; truncated inventory,
+  duplicate identity, resource-bound violations, regressed cursors and changed
+  immutable UID content reject the plan. No provider deletion is represented.
+- Initial/history/reset suppression persists across metadata/flag updates.
+  Content fingerprints are caller-supplied raw-content hashes, not verified by
+  this metadata-only function. Unique hash/size matches can suggest a move but
+  never merge messages, bypass mailbox scope or authorize an automated action.
+  `new_candidate` is explicitly not send/AI/notification eligibility.
+- Atomic persistence, lease fencing, retry/restart behavior, provider response
+  validation and current authorization remain unimplemented W15 acceptance
+  requirements; pure fixture tests are not claims of durable or live sync.

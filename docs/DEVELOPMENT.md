@@ -243,3 +243,48 @@ duplicate folder, reviews and edits the preview, checks accessibility and all
 three steps at eight viewport widths, and asserts no external browser requests.
 Sign-in clears the cached pre-authentication CSRF request after rotating the
 session token so subsequent client navigation obtains the current token.
+
+## Fixture-only reconciliation core
+
+`@ai-webmail/domain/mail-reconciliation` exports
+`planMailboxReconciliation(scope, previousSnapshot, completeInventories)`. Under
+D019 this is a pure metadata planner, not an enabled import adapter. It has no
+database, filesystem, HTTP, IMAP, AI, notification or send dependency and is not
+wired to the worker or any web route. Run its synthetic fixtures with
+`npm run test:unit --workspace=@ai-webmail/domain`.
+
+The scope includes both organization and mailbox; a prior snapshot for another
+scope is rejected. Each supplied folder inventory must be complete, with its
+exact path, nonzero 32-bit UIDVALIDITY/UIDNEXT, unique UIDs below UIDNEXT, bounded
+metadata and optional SHA-256 of exact raw content. Bounds are 100 folders and
+20,000 metadata records per snapshot/observation set. A truncated page is not a
+complete inventory. Omitted folders are preserved, not treated as deleted.
+Folder removal/rename discovery, paginated fetch and durable cursor commits are
+not implemented by this contract.
+
+The returned snapshot and insert/update/remove references describe local
+metadata changes only; removals must never be translated into provider DELETE
+or EXPUNGE. A UIDVALIDITY reset replaces the old folder identity and marks all
+reimports historical. Same-epoch UIDs never merge on Message-ID: missing and
+duplicate IDs are valid. Flags are case-insensitively canonicalized; immutable
+content changes for a stable UID or regressing UIDNEXT reject the whole plan.
+An unfetched/null hash preserves the known stored hash for a stable UID; a
+different known hash is rejected. Hash absence never forces body refetch.
+The planner does not mutate prior snapshots or inputs.
+
+Initial history, resets, late UIDs, known/copied content, ambiguous duplicate
+content and absent fingerprints are suppressed. Classification is sticky for
+stable UIDs, including after flag updates or later fingerprint enrichment.
+Only a previously unseen high UID with unique content may be a `new_candidate`;
+this is **not** eligibility or authority for AI, notifications or sending.
+Future consumers must still check folder role, actual arrival/history policy,
+current mailbox authorization, deduplication and the relevant feature gates.
+No jobs or events are emitted here.
+
+Move hints require one disappeared source and one destination with a unique
+same-mailbox raw-content hash plus size. They are hints, not logical-message
+merges; destination UID identity is retained. Copies and ambiguous matches have
+no move hint and stay distinct. Reset/initial suppression takes precedence even
+when a move hint exists. Full W15 still needs a gated provider adapter,
+transactional persistence, concurrency/fencing, restart/cursor and failure
+evidence; fixture success alone does not complete it.
