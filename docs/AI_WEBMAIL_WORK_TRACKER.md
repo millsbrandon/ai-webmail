@@ -322,7 +322,15 @@ Research was done from official public documentation while W01 remote setup was 
 - Reviewer: Copilot technical evidence review of W12's implemented synthetic A01/A07 scope. Rollback: revert W12 task commits/disable new routes; preserve local volumes and retained audit evidence. Restore grants only through a deliberate reviewed migration, never by giving runtime DDL authority.
 - Next ordered task: W13, blocked under D016 rather than started through an unpassed security gate. W10 requires physical-device and real recovery-preparation evidence; W04 requires confirmed mailbox/provider/folder configuration and authorized isolated owned-test scope. Existing virtual-authenticator/synthetic tests do not supply those facts. The unrelated untracked login duplicate remains untouched and excluded.
 
+## W10 device-test preparation follow-up — 10 November 2026
+
+- Status: supporting invitation usability fix verified locally; W10 remains blocked, with no physical-device result claimed. Branch `fix/W10-invitation-feedback` is based on W12 evidence checkpoint `375cddf0fd5777041c62e639cbf1f70bdbb8c81a`.
+- During hands-on synthetic-account setup, repeated invitation rejection did not consume the invitations or create the account. No submitted password was inspected. Existing generic feedback conflated password/name policy failures with invalid invitations; the exact user's rejected field is not established.
+- Changed: invitation acceptance reports password/display-name policy failures independently of invitation validity, while invalid/expired/used/wrong-email invitations retain one non-disclosing response. The form clarifies that the application password is separate from mailbox credentials. Integration coverage checks identical password-policy feedback for valid/invalid tokens and successful subsequent redemption; browser coverage verifies a short-password error followed by successful redemption, login and logout.
+- Validation: `npm run lint`, `npm run typecheck`, `npm run test:integration` (22 tests), targeted `npm run test:e2e --workspace @ai-webmail/web -- e2e/auth.spec.ts` (1 test including axe checks), `npm run build`, and `git diff --check` passed. The manual server was temporarily stopped to allow the isolated browser-test server to acquire Next's development lock. No dependency/schema change or live mailbox access occurred.
+
 ## Requirement traceability
+
 | Requirement | Primary tasks | Acceptance |
 |---|---|---|
 | Shared inbox ACL / fixed mailbox From | W11,W12,W18,W21,W24 | A01,A02,A07 |

@@ -143,6 +143,34 @@ test("invite redemption creates one account and passwords authenticate without e
 	const reusedCsrfResponse = await getCsrf(csrfGetRequest(csrfToken));
 	assert.equal((await reusedCsrfResponse.json()).csrfToken, csrfToken);
 
+	for (const token of [issued.token, "invalid-invitation-token"]) {
+		const rejected = await acceptInvite(
+			csrfRequest("/api/auth/invitations/accept", csrfToken, {
+				token,
+				email,
+				displayName: "Synthetic User",
+				password: "short-password",
+			}),
+		);
+		assert.equal(rejected.status, 400);
+		assert.deepEqual(await rejected.json(), {
+			error:
+				"Use a password of 15–128 characters that is not a common password.",
+		});
+	}
+	const invalidName = await acceptInvite(
+		csrfRequest("/api/auth/invitations/accept", csrfToken, {
+			token: issued.token,
+			email,
+			displayName: " ",
+			password,
+		}),
+	);
+	assert.equal(invalidName.status, 400);
+	assert.deepEqual(await invalidName.json(), {
+		error: "Use a display name of 1–100 characters.",
+	});
+
 	const accepted = await acceptInvite(
 		csrfRequest("/api/auth/invitations/accept", csrfToken, {
 			token: issued.token,
