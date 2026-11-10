@@ -713,6 +713,12 @@ input:focus-visible {
 	overflow-wrap: anywhere;
 }
 
+.auth-security .button {
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	white-space: normal;
+}
+
 @media (max-width: 540px) {
 	.landing {
 		padding: var(--space-8) var(--space-4);

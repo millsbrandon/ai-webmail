@@ -45,8 +45,9 @@ test("session settings revoke individual and other sessions while preserving thi
 		const individual = await createSession(database.db, userId, new Date(), {
 			deviceLabel: "Firefox on Linux",
 		});
+		const otherDeviceLabel = "Synthetic browser session ".repeat(3).trim();
 		const other = await createSession(database.db, userId, new Date(), {
-			deviceLabel: "Safari on iOS/iPadOS",
+			deviceLabel: otherDeviceLabel,
 		});
 		await page.goto("/login");
 		await page.getByLabel("Email").fill(email);
@@ -98,7 +99,7 @@ test("session settings revoke individual and other sessions while preserving thi
 			.click();
 		await expect(
 			page.getByRole("button", {
-				name: "Sign out Safari on iOS/iPadOS",
+				name: `Sign out ${otherDeviceLabel}`,
 				exact: true,
 			}),
 		).toHaveCount(0);
