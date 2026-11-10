@@ -347,3 +347,48 @@ export const auditEvents = app.table(
 		check("audit_events_outcome_valid", sql`${table.outcome} = 'success'`),
 	],
 );
+
+export const pollJobs = app.table(
+	"poll_jobs",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		organizationId: uuid("organization_id").notNull(),
+		mailboxId: uuid("mailbox_id").notNull(),
+		kind: text("kind").$type<"synthetic.poll">().notNull(),
+		state: text("state")
+			.$type<"ready" | "running" | "failed">()
+			.notNull()
+			.default("ready"),
+		dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+		leaseToken: uuid("lease_token"),
+		leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
+		attempts: integer("attempts").notNull().default(0),
+		lastError: text("last_error").$type<"processor_failed" | "lease_expired">(),
+		lastSucceededAt: timestamp("last_succeeded_at", { withTimezone: true }),
+	},
+	(table) => [
+		unique("poll_jobs_mailbox_unique").on(
+			table.organizationId,
+			table.mailboxId,
+		),
+		foreignKey({
+			columns: [table.organizationId, table.mailboxId],
+			foreignColumns: [mailboxes.organizationId, mailboxes.id],
+		}).onDelete("cascade"),
+		index("poll_jobs_due_idx").on(table.state, table.dueAt),
+		check("poll_jobs_kind_valid", sql`${table.kind} = 'synthetic.poll'`),
+		check(
+			"poll_jobs_state_valid",
+			sql`${table.state} IN ('ready', 'running', 'failed')`,
+		),
+		check("poll_jobs_attempts_valid", sql`${table.attempts} BETWEEN 0 AND 5`),
+		check(
+			"poll_jobs_error_valid",
+			sql`${table.lastError} IN ('processor_failed', 'lease_expired')`,
+		),
+		check(
+			"poll_jobs_lease_valid",
+			sql`(${table.state} = 'running' AND ${table.leaseToken} IS NOT NULL AND ${table.leaseExpiresAt} IS NOT NULL) OR (${table.state} <> 'running' AND ${table.leaseToken} IS NULL AND ${table.leaseExpiresAt} IS NULL)`,
+		),
+	],
+);

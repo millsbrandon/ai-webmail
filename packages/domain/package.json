@@ -4,11 +4,13 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		"./mailbox-access": "./src/mailbox-access.ts"
+		"./mailbox-access": "./src/mailbox-access.ts",
+		"./poll-queue": "./src/poll-queue.ts"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
-		"test:unit": "tsx --test src/mailbox-access.unit.test.ts"
+		"test:unit": "tsx --test src/mailbox-access.unit.test.ts",
+		"test:integration": "node --env-file-if-exists=../../.env --import tsx --test src/poll-queue.integration.test.ts"
 	},
 	"dependencies": {
 		"@ai-webmail/db": "*",

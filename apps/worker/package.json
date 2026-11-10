@@ -5,11 +5,16 @@
 	"type": "module",
 	"scripts": {
 		"dev": "tsx watch src/main.ts",
-		"build": "tsc --project tsconfig.json",
+		"build": "tsc --project tsconfig.json && esbuild src/main.ts --bundle --platform=node --format=esm --external:pg --external:drizzle-orm --outfile=dist/main.js",
 		"start": "node dist/main.js",
 		"typecheck": "tsc --project tsconfig.json --noEmit"
 	},
+	"dependencies": {
+		"@ai-webmail/db": "*",
+		"@ai-webmail/domain": "*"
+	},
 	"devDependencies": {
+		"esbuild": "0.28.2",
 		"tsx": "4.23.15"
 	}
 }

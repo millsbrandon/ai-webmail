@@ -43,9 +43,10 @@
    use HTTPS. WebAuthn derives its relying-party ID from this origin's
    hostname. A deployed hostname must be finalized before users enroll
    passkeys; use separate origins and credentials for localhost and staging.
-7. In a separate terminal, `npm run worker:dev` starts the bounded worker
-   process. It intentionally has no polling or job processors until their
-   tracker tasks are implemented.
+7. In a separate terminal, `npm run worker:dev` starts the bounded worker.
+   W14 supports only explicitly enqueued synthetic empty polls; it does not
+   provision schedules, connect to a mail provider, or call AI. The process
+   requires the runtime `DATABASE_URL` and handles SIGINT/SIGTERM cleanly.
 
 ## Verification
 
@@ -96,7 +97,7 @@ synthetic users, but there is no public invitation issuance, production
 provisioning, verified personal recovery address, or source/IP rate limiter.
 W11 adds unprovisioned organization/mailbox memberships and scoped metadata
 reads only. Do not use real user accounts. There are no
-mailbox credentials, mail content, synchronization jobs, send routes, or
+mailbox credentials, mail content, provider synchronization jobs, send routes, or
 external integrations. The public landing page explicitly states that no
 mailbox is connected. Use synthetic data only.
 
@@ -163,3 +164,46 @@ from before W12 are labelled `unknown` method rather than fabricating history.
   test-user cleanup; use an isolated test database, never a live database.
   Failed-request auditing, retention policy, user provisioning, password-change
   UI, owner recovery and queued-send invalidation remain later release work.
+
+## Synthetic durable scheduler
+
+W14's shared `@ai-webmail/domain/poll-queue` service stores one unique recurring
+`synthetic.poll` job per organization/mailbox. `enqueueSyntheticPoll` accepts a
+database transaction, so future setup can atomically create mailbox metadata and
+its job; duplicate enqueue preserves existing state and due time. There is no
+public enqueue route or automatic enrollment of mailboxes.
+
+- The worker checks for due jobs once per second, processes one at a time, and
+  uses PostgreSQL `FOR UPDATE SKIP LOCKED` to avoid competing claims.
+- A successful empty poll persists its next due time 60 seconds after completion.
+  This avoids catch-up storms after downtime. Queue backlog, the one-second
+  scan interval and processing duration add scheduling delay; this is not an
+  instant-delivery or strict 60-second start guarantee.
+- Claims receive a random fencing token and a 30-second lease. Expired claims
+  are recoverable after process failure. Completion/failure requires the same
+  current, unexpired lease; stale workers cannot overwrite a replacement.
+- Failures use exponential delay from one second, plus up to 25% jitter, and
+  stop after five attempts. Repeated lease expiry also exhausts that budget.
+  Terminal jobs remain visible as `failed`; there is no automatic/manual retry
+  endpoint yet. Only fixed error categories are stored, never arbitrary errors,
+  credentials, user content or request payloads.
+- Disabled mailboxes are not claimed. Composite foreign keys enforce tenant
+  identity. No user-controlled job payload, handler name or provider credentials
+  are accepted. Runtime DB access is a service trust boundary, not row security.
+- Only an empty synthetic processor is wired. Future mail processors must add
+  lease renewal/cancellation, mailbox credential/authorization checks and
+  idempotent side effects before they may run. Fencing queue updates alone
+  cannot prevent a stale process from performing external I/O or guarantee
+  exactly-once mail delivery.
+
+`npm run test:integration` includes isolated queue tests. The 120-cycle test
+advances explicit timestamps through two logical hours, rather than waiting two
+hours; it proves due-time boundaries and zero fetch calls, not provider polling.
+Additional tests cover competing/locked claims, rollback, retry exhaustion,
+stale completion, a replacement database connection, and actual worker-process
+restart/shutdown.
+
+`npm run worker:build` typechecks shared TypeScript and bundles first-party
+workspace modules with exact-pinned esbuild; `pg`/Drizzle stay external installed
+dependencies. `npm run worker:start` runs the emitted JavaScript with no
+TypeScript runtime loader.
