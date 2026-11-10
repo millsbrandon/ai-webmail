@@ -4,7 +4,7 @@ Version 1.0 • 7 October 2026
 Companion: AI_WEBMAIL_DESIGN_PLAYBOOK.md. Product: standalone open-source codebase; NO OpenClaw runtime.
 
 ## Current truth
-Implementation completed: **6 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05–W09 are done. G0 is exited for foundation work with W02–W04 explicitly blocked. G1 is technically exited for G2 local implementation; W10 is blocked on device/recovery evidence and W11 is active independently under D014. Production authentication/provisioning and all external integrations remain disabled.
+Implementation completed: **7 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05–W09 and W11 are done. G0 is exited for foundation work with W02–W04 explicitly blocked. G1 is technically exited for G2 local implementation; W10 is blocked on device/recovery evidence and W12 is next under D015. Production authentication/provisioning and all external integrations remain disabled.
 
 Documentation deliverables: design playbook and this tracker authored; document checks are separate from implementation progress.
 
@@ -41,13 +41,13 @@ Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate sig
 
 ## G2 — Authentication and isolation
 Entry: G1 verified.
-Gate status: IN PROGRESS FOR LOCAL AUTH AND ISOLATION IMPLEMENTATION. Reviewer/date: autonomous task progression under D012/D014, 10 November 2026; W09 complete, W10 blocked on physical-device/recovery evidence, W11 active independently. G2 has not exited. Authentication remains unprovisioned outside local synthetic development.
+Gate status: IN PROGRESS FOR LOCAL AUTH AND ISOLATION IMPLEMENTATION. Reviewer/date: autonomous task progression under D012/D014/D015, 10 November 2026; W09/W11 complete, W10 blocked on physical-device/recovery evidence, W12 next. G2 has not exited. Authentication remains unprovisioned outside local synthetic development.
 
 | ID | Task | Status | Required completion evidence | Acceptance |
 |---|---|---|---|---|
 | W09 | Implement invite-only users and password auth | done | Hash/cooldown/session/CSRF tests; invitation expiry/replay; no enumeration | A03 |
 | W10 | Implement passkeys and recovery | blocked | Real-device passkey evidence, challenge replay/origin tests, recovery drill | A03 |
-| W11 | Implement mailbox memberships and capability service | review | Owner/A/B fixture passes direct API and object access tests | A01,A02 |
+| W11 | Implement mailbox memberships and capability service | done | Owner/A/B fixture passes direct API and object access tests | A01,A02 |
 | W12 | Implement session revocation and audit | todo | Immediate disabled-user rejection, privileged reauth, attributable events | A01,A07 |
 
 Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate signature and release impact recorded before next phase.
@@ -178,6 +178,7 @@ D011: Owner approved the repository baseline and requested implementation start.
 D012: On 8 October 2026 the owner directed autonomous progress without waiting for routine owner sign-off. Continue local, reversible work and make documented technical phase reviews when evidence satisfies the written criteria. This does not waive live-data, external-send, paid-service, production/deployment, AI, WhatsApp, or other explicitly stated safety gates.
 D013: G1 technical exit authorizes local G2 implementation only; it does not enable production authentication or user invitations. W09 remains invite-only and synthetic in development. No public self-registration, live invitations, or deployment is in scope.
 D014: On 10 November 2026, following the owner's renewed direction to continue autonomous work, technical review permits W11 synthetic authorization implementation independently of W10's unavailable physical-device/recovery evidence. W10 is blocked, not complete; no device result is inferred. W11 depends on the verified W09 session contract, not physical authenticators. Only W11 is in progress. This supersedes the earlier W10 handoff's blanket sequencing restriction, not A03 or the G2 exit gate; real mailbox connections, production provisioning and all external safety gates remain blocked.
+D015: W11 local and CI acceptance evidence is verified on 10 November 2026; proceed to W12 synthetic session-revocation/audit work using W09/W11 contracts independently of W10's physical-device blocker. No G2 exit or production enablement is implied. Only one implementation task is active at a time; W10 remains blocked.
 
 ## W02/W03 independent feasibility research — 7 October 2026
 
@@ -291,7 +292,7 @@ Research was done from official public documentation while W01 remote setup was 
 
 ## W11 mailbox memberships and capabilities — 10 November 2026
 
-- Status: **review** pending pushed checkpoint/CI. Owner/reviewer: project implementation / Copilot technical evidence review. Acceptance: W11 synthetic A01/A02 isolation scope only; future mail/search/download/send surfaces remain separate tasks.
+- Status: **done**. Owner/reviewer: project implementation / Copilot technical evidence review. Acceptance: W11 synthetic A01/A02 isolation scope only; future mail/search/download/send surfaces remain separate tasks.
 - Branch: `feat/W11-mailbox-capabilities`, based on verified W10 checkpoint `552c5fc39512da3ddf496ea9c1d102f558892e7b` (PR #7 remains open/unmerged with passing CI).
 - Plan: organization and explicit mailbox memberships with composite tenant constraints; shared deny-by-default role/capability service; session-authenticated, scoped metadata list/detail routes; synthetic Owner/A/B, administrator-without-content, cross-organization and revoked/disabled-member tests.
 - Safety: no mailbox connection, credentials, content, invitation delivery, real identities, or deployment. W10's evidence remains blocked; G2 has not exited. An existing untracked duplicate login source is not part of this task and will not be staged or modified.
@@ -302,6 +303,7 @@ Research was done from official public documentation while W01 remote setup was 
 - Checkpoint review: complete code/schema/lockfile/documentation diff reviewed; `git diff --cached --check` passed; `gitleaks git --no-banner --redact --log-opts='--all'` scanned 28 reachable commits with no leaks; `gitleaks protect --staged --no-banner --redact` found no leaks. The unrelated untracked login duplicate is excluded.
 - Limits: scoped metadata and policy only; no message objects, sending, streams, search, attachments, AI or membership administration UI is claimed complete. Future surfaces must apply the same tenant/mailbox/capability scope before fetching their own objects. Runtime grants are a service trust boundary, not database row-level security.
 - Rollback: revert W11 task commits and disable its read routes; preserve local volumes and do not remove shared database tables or production data as a shortcut.
+- GitHub: implementation `c927c9d46fbf98543c9bee0732984c091536f003` pushed with exact remote SHA verified. Stacked PR [#8](https://github.com/millsbrandon/ai-webmail/pull/8) targets W10 PR #7 and remains open/unmerged. Push/PR CI passed ([42904759489](https://github.com/millsbrandon/ai-webmail/actions/runs/42904759489), [42904785779](https://github.com/millsbrandon/ai-webmail/actions/runs/42904785779)). Next permitted local task: W12 under D015.
 
 ## Requirement traceability
 | Requirement | Primary tasks | Acceptance |
