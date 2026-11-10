@@ -6,11 +6,12 @@
 	"exports": {
 		"./mailbox-access": "./src/mailbox-access.ts",
 		"./poll-queue": "./src/poll-queue.ts",
-		"./mailbox-setup": "./src/mailbox-setup.ts"
+		"./mailbox-setup": "./src/mailbox-setup.ts",
+		"./mail-reconciliation": "./src/mail-reconciliation.ts"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
-		"test:unit": "tsx --test src/mailbox-access.unit.test.ts src/mailbox-setup.unit.test.ts",
+		"test:unit": "tsx --test src/mailbox-access.unit.test.ts src/mailbox-setup.unit.test.ts src/mail-reconciliation.unit.test.ts",
 		"test:integration": "node --env-file-if-exists=../../.env --import tsx --test src/poll-queue.integration.test.ts"
 	},
 	"dependencies": {
