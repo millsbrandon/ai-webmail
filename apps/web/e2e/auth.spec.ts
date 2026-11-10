@@ -43,6 +43,11 @@ test("invitation, generic login failures, session, and logout work in the browse
 
 		await page.getByLabel("Invited email").fill(email);
 		await page.getByLabel("Display name").fill("Synthetic E2E User");
+		await page.getByLabel("Password", { exact: true }).fill("short-password");
+		await page.getByRole("button", { name: "Accept invitation" }).click();
+		await expect(page.locator("form").getByRole("alert")).toHaveText(
+			"Use a password of 15–128 characters that is not a common password.",
+		);
 		await page.getByLabel("Password", { exact: true }).fill(password);
 		await page.getByRole("button", { name: "Accept invitation" }).click();
 		await expect(

@@ -127,7 +127,8 @@ export function InvitationForm({ token }: { token: string }) {
 					value={password}
 				/>
 				<p className="gallery-help" id="invite-password-help">
-					Use 15–128 characters.
+					Use 15–128 characters. This is a new application password, not your
+					email mailbox password.
 				</p>
 			</div>
 			<button

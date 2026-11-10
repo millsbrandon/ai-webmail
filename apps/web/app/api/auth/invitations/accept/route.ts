@@ -1,13 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { hasValidCsrf, hasValidOrigin } from "../../../../../lib/auth/csrf";
 import { acceptInvitation } from "../../../../../lib/auth/invitations";
+import { validatePassword } from "../../../../../lib/auth/password";
 import { readBoundedJsonBody } from "../../../../../lib/auth/request-body";
 import { getDatabase } from "../../../../../lib/database";
 
 export const runtime = "nodejs";
 
 const invalidInvitation = {
-	error: "This invitation could not be used. Request a new invitation.",
+	error:
+		"This invitation could not be used. Check that the email matches the invited address. If it does, request a new invitation.",
 };
 
 export async function POST(request: NextRequest) {
@@ -38,6 +40,25 @@ export async function POST(request: NextRequest) {
 			status: 400,
 			headers: { "Cache-Control": "no-store" },
 		});
+	}
+
+	if (!validatePassword(details.password)) {
+		return NextResponse.json(
+			{
+				error:
+					"Use a password of 15–128 characters that is not a common password.",
+			},
+			{ status: 400, headers: { "Cache-Control": "no-store" } },
+		);
+	}
+	if (
+		details.displayName.trim().length < 1 ||
+		details.displayName.trim().length > 100
+	) {
+		return NextResponse.json(
+			{ error: "Use a display name of 1–100 characters." },
+			{ status: 400, headers: { "Cache-Control": "no-store" } },
+		);
 	}
 
 	try {
