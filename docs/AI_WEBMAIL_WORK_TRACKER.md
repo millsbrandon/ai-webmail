@@ -4,7 +4,7 @@ Version 1.0 • 7 October 2026
 Companion: AI_WEBMAIL_DESIGN_PLAYBOOK.md. Product: standalone open-source codebase; NO OpenClaw runtime.
 
 ## Current truth
-Implementation completed: **9 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05–W09, W11–W12 and W14 are done. G0 is exited for foundation work with W02–W04 explicitly blocked. G1 is technically exited for G2 local implementation; W10 remains blocked on device/recovery evidence. G2 has not exited and W13 is blocked under D016. W14's independent synthetic queue infrastructure is verified under D017; W13's disconnected preview and W15's pure fixture reconciliation core are verified under D018–D019. W16 has a bounded parser/threading/attachment-helper preparation verified under D020, but durable storage and provider integration remain blocked. W17 is in progress under the fixture-only presentation exception D021; no G2/G3 phase exit or external integration is implied. Production authentication/provisioning and all external integrations remain disabled.
+Implementation completed: **10 / 40 tasks**. No implementation or release task is marked complete merely because its design exists. W01, W05–W09, W11–W12, W14 and W17 are done. G0 is exited for foundation work with W02–W04 explicitly blocked. G1 is technically exited for G2 local implementation; W10 remains blocked on device/recovery evidence. G2 has not exited and W13 is blocked under D016. W14's independent synthetic queue infrastructure is verified under D017; W13's disconnected preview and W15's pure fixture reconciliation core are verified under D018–D019. W16 has a bounded parser/threading/attachment-helper preparation verified under D020, but durable storage and provider integration remain blocked. W17's development-only synthetic presentation scope is complete under D021; no G2/G3 phase exit or external integration is implied. Production authentication/provisioning and all external integrations remain disabled.
 
 Documentation deliverables: design playbook and this tracker authored; document checks are separate from implementation progress.
 
@@ -67,11 +67,11 @@ Exit: task evidence reviewed; failures resolved or explicitly blocking. Gate sig
 
 ## G4 — Responsive webmail and drafts
 Entry: G3 data fixtures pass.
-Gate status: W17 synthetic UI preparation only under D021; G2/G3 provider gates remain in force. Reviewer/date: technical fixture review, 11 November 2026.
+Gate status: W17 presentation scope complete under D021; G2/G3 provider gates remain in force. Reviewer/date: technical fixture review, 11 November 2026.
 
 | ID | Task | Status | Required completion evidence | Acceptance |
 |---|---|---|---|---|
-| W17 | Build responsive shell/list/thread navigation | in_progress | Viewport/theme snapshots, back/scroll and keyboard flow | A10 |
+| W17 | Build responsive shell/list/thread navigation | done | Eight target viewport widths in both themes; no overflow/header overlap; thread back/scroll, keyboard focus and axe pass | A10 |
 | W18 | Build search, labels, folders and per-user read state | todo | Permission-scoped search/counts, provider flags reconciled | A01,A02 |
 | W19 | Build composer and draft version/sync | todo | Autosave/conflict/attachment/signature/recipient tests | A07,A15 |
 | W20 | Build internal notes, attribution and assignment | todo | No internal content in customer MIME; actor recorded | A02,A07 |
@@ -387,13 +387,15 @@ Research was done from official public documentation while W01 remote setup was 
 
 ## W17 responsive synthetic inbox shell — 11 November 2026
 
-- Status: **in progress; local implementation and validation pass, checkpoint CI pending**. D021 permits only this clearly labelled, development-only fictional preview. W17 does not complete W16, exit G2/G3, enable a provider, or authorize release.
+- Status: **done for the presentation scope** under D021 after local review, secret scan, exact remote SHA verification and both Linux CI runs. This does not complete W16, exit G2/G3, enable a provider, or authorize release.
 - Changed: added a production-disabled, `noindex` `/mail/demo/inbox` and thread preview with fictional `.invalid` data; responsive shell, theme toggle, mobile navigation dialog, body-free list summaries, internal-note example, and landing/development-guide links. No database/API/provider access, persistence, send action, AI, notifications, or downstream jobs were added.
 - Related defects fixed: browser testing found that selected-thread state was attached to `.mail-workspace` while mobile CSS reads it from `.mail-content`, so the inbox list remained visible behind the selected thread. The state now lives on the CSS-targeted element; the regression verifies list hiding and preserved scroll position when returning to the inbox. Visual review also found that the 1024–1439px menu trigger created a fourth header item while the desktop three-column grid remained active, wrapping the header actions into the content. The breakpoint now defines the matching four-column header, and the viewport/theme test checks header/content vertical boundaries at every target width.
 - Local evidence: Node.js 24.21.0 / exact npm 11.16.0; installed with `npm ci --ignore-scripts` in a clean isolated source copy. `npm run lint`, `npm run test:unit` (44 total: 14 web, 2 database, 28 domain), `npm run typecheck`, targeted `npm run test:e2e --workspace @ai-webmail/web -- e2e/mail-shell.spec.ts` (3 Chromium tests), `npm run build`, `npm run worker:build`, and `npm audit --audit-level=low` (0 vulnerabilities) passed. Playwright used a dummy `DATABASE_URL` only because its config requires one; this UI route made no database connection. E2E generated light/dark screenshots at 320, 375, 390, 768, 1024, 1280, 1440 and 1920 CSS pixels; automated overflow and axe checks passed, as did mobile thread navigation/back-scroll and keyboard drawer-focus checks. Screenshots at 320 and 1920 in both themes were visually inspected.
+- Visual evidence: screenshots at 320px in both themes, 768px light, 1024px dark and 1920px in both themes were manually inspected after fixes. Automated screenshots and overflow/header-boundary assertions cover all eight widths and both themes; axe reports no violations for inbox and thread views.
 - Safety/limits: all people, addresses, messages and mailbox identity are fictional; summaries exclude message bodies; thread text is rendered as React text. Preview is unavailable in production. No live mailbox, provider credential, external send, paid service, AI/WhatsApp integration or production configuration was used. This is presentation preparation only, not a working mailbox.
 - Rollback: revert W17 UI/routes/tests/docs; no schema or persistent data change needs migration. The unrelated untracked duplicate login/worker files remain untouched.
-- Checkpoint review, push, PR and CI evidence will be added after the full diff/secret scan and remote checks. W17 remains the only active implementation task until that checkpoint is verified.
+- Checkpoint review: full source/styles/tests/docs diff reviewed; `git diff --cached --check` and `gitleaks protect --staged --no-banner --redact` passed. The unchanged W16 base history had already passed a full-history Gitleaks scan; a redundant repeat stalled in `git log -p --all` for more than five minutes and was stopped. The unrelated untracked login/worker duplicates were not staged.
+- Remote: implementation commit `e75ba29f78ee1feccd89bc51544f0d66ffe45669` is pushed and `git ls-remote` matched the exact SHA. Stacked PR [#15](https://github.com/millsbrandon/ai-webmail/pull/15) targets `feat/W16-synthetic-mime-core`, remains open/unmerged. Both CI runs passed on the implementation SHA: [push](https://github.com/millsbrandon/ai-webmail/actions/runs/43050841456) and [PR](https://github.com/millsbrandon/ai-webmail/actions/runs/43050888074). No database migration or production action was required.
 
 ## Requirement traceability
 
