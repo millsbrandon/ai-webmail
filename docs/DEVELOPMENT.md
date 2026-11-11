@@ -38,6 +38,10 @@
    PostgreSQL connection is reachable. It never returns connection details.
    The static design-system gallery is available at
    `http://localhost:3000/design-system`; it uses synthetic examples only.
+   The responsive inbox shell is available at
+   `http://localhost:3000/mail/demo/inbox`; it uses fictional `.invalid`
+   messages and is disabled in production builds. It has no database, provider,
+   sending, AI, or notification integration.
    Set `APP_ORIGIN` to the exact browser origin used for the app. Mutation
    routes reject requests without that exact `Origin`; production origins must
    use HTTPS. WebAuthn derives its relying-party ID from this origin's

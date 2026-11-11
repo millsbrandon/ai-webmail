@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppIcon } from "../components/icon";
+import { isSyntheticInboxPreviewEnabled } from "../lib/mail-demo";
 
 export default function Home() {
 	return (
@@ -15,6 +16,11 @@ export default function Home() {
 				Foundation build — no mailbox data is connected.
 			</p>
 			<div className="landing-actions">
+				{isSyntheticInboxPreviewEnabled() ? (
+					<Link className="button button-secondary" href="/mail/demo/inbox">
+						Open synthetic inbox preview
+					</Link>
+				) : null}
 				<Link className="button button-primary" href="/design-system">
 					View component gallery
 				</Link>
