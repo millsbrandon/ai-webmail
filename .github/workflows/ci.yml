@@ -96,8 +96,8 @@ jobs:
       - name: Run PostgreSQL integration tests
         run: npm run test:integration
 
-      - name: Install Chromium and system dependencies
-        run: npx playwright install --with-deps chromium
+      - name: Install Chromium
+        run: npx playwright install chromium
 
       - name: Run end-to-end and accessibility tests
         run: npm run test:e2e
